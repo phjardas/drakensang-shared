@@ -33,6 +33,7 @@ public class Launcher implements Runnable {
 		LOG.info("Bootstrapping");
 
 		try {
+			bundle = ResourceBundle.getBundle(program.getResourceBundleName());
 			Class.forName("org.sqlite.JDBC");
 
 			checkSettings();

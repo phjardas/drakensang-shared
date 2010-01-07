@@ -1,28 +1,33 @@
 package de.jardas.drakensang.shared;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import java.util.Locale;
 import java.util.Properties;
 
-public class Settings {
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+public abstract class Settings {
 	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
 			.getLogger(Settings.class);
-	private static final File SETTINGS_DIRECTORY = new File(System
-			.getProperty("user.home"), ".drakensang-editor-2");
-	private static final File SETTINGS_FILE = new File(SETTINGS_DIRECTORY,
-			"settings.properties");
+	private static File settingsDirectory;
+	private static File settingsFile;
 	private static Settings instance;
-	private File drakensangHome;
-	private int latestKnownFeature = -1;
-	private boolean createBackupOnSave = true;
-	private Locale locale;
-	private File backupDirectory = new File(SETTINGS_DIRECTORY, "backups");
+	private static Class<? extends Settings> settingsClass;
+
+	public static void init(String settingsDirectory,
+			Class<? extends Settings> settingsClass) {
+		Settings.settingsDirectory = new File(System.getProperty("user.home"),
+				settingsDirectory);
+		settingsFile = new File(settingsDirectory, "settings.properties");
+		Settings.settingsClass = settingsClass;
+	}
+
+	public static File getSettingsDirectory() {
+		return settingsDirectory;
+	}
 
 	public static synchronized Settings getInstance() {
 		if (instance == null) {
@@ -30,6 +35,46 @@ public class Settings {
 		}
 
 		return instance;
+	}
+
+	private File drakensangHome;
+	private int latestKnownFeature;
+	private Locale locale;
+
+	protected void readProperties(Properties props) {
+		if (props.get("drakensang.home") != null) {
+			setDrakensangHome(new File(props.getProperty("drakensang.home")));
+		}
+
+		if (props.get("latestKnownFeature") != null) {
+			setLatestKnownFeature(Integer.valueOf(props
+					.getProperty("latestKnownFeature")));
+		}
+
+		if (props.get("locale.language") != null) {
+			final String language = props.getProperty("locale.language");
+			final String country = props.getProperty("locale.country");
+			final String variant = props.getProperty("locale.variant");
+			setLocale(new Locale(language, country, variant));
+		}
+	}
+
+	protected void writeProperties(Properties props) {
+		props.setProperty("drakensang.home", getDrakensangHome()
+				.getAbsolutePath());
+
+		props.setProperty("latestKnownFeature", String
+				.valueOf(getLatestKnownFeature()));
+
+		if (getLocale() != null) {
+			props.setProperty("locale.language", getLocale().getLanguage());
+			props.setProperty("locale.country", getLocale().getCountry());
+			props.setProperty("locale.variant", getLocale().getVariant());
+		}
+	}
+
+	protected void initialize() {
+		latestKnownFeature = FeatureHistory.getLatestFeatureId();
 	}
 
 	public File getDrakensangHome() {
@@ -48,22 +93,6 @@ public class Settings {
 		this.latestKnownFeature = latestKnownFeature;
 	}
 
-	public boolean isCreateBackupOnSave() {
-		return createBackupOnSave;
-	}
-
-	public void setCreateBackupOnSave(boolean createBackupOnSave) {
-		this.createBackupOnSave = createBackupOnSave;
-	}
-
-	public File getBackupDirectory() {
-		return backupDirectory;
-	}
-
-	public void setBackupDirectory(File backupDirectory) {
-		this.backupDirectory = backupDirectory;
-	}
-
 	public Locale getLocale() {
 		return locale;
 	}
@@ -73,82 +102,52 @@ public class Settings {
 	}
 
 	public synchronized void save() {
-		Properties props = new Properties();
-		props.setProperty("drakensang.home", getDrakensangHome()
-				.getAbsolutePath());
-
-		props.setProperty("latestKnownFeature", String
-				.valueOf(getLatestKnownFeature()));
-
-		props.setProperty("backups.enabled", Boolean
-				.toString(isCreateBackupOnSave()));
-
-		if (getLocale() != null) {
-			props.setProperty("locale.language", getLocale().getLanguage());
-			props.setProperty("locale.country", getLocale().getCountry());
-			props.setProperty("locale.variant", getLocale().getVariant());
-		}
-
-		if (getBackupDirectory() != null) {
-			props.setProperty("backups.directory", getBackupDirectory()
-					.getAbsolutePath());
-		}
+		final Properties props = new Properties();
+		writeProperties(props);
 
 		try {
-			SETTINGS_FILE.getParentFile().mkdirs();
-			props.store(new FileOutputStream(SETTINGS_FILE), null);
-			LOG.debug("Settings saved to " + SETTINGS_FILE + ".");
+			settingsFile.getParentFile().mkdirs();
+			props.store(new FileOutputStream(settingsFile), null);
+			LOG.debug("Settings saved to " + settingsFile + ".");
 		} catch (IOException e) {
-			LOG.error("Error writing settings to " + SETTINGS_FILE + ": " + e,
-					e);
+			LOG
+					.error("Error writing settings to " + settingsFile + ": "
+							+ e, e);
 		}
 	}
 
 	private static synchronized Settings load() {
-		LOG.debug("Loading settings from " + SETTINGS_FILE);
+		LOG.debug("Loading settings from " + settingsFile);
 
-		Settings settings = new Settings();
+		final Settings settings = createSettingsInstance();
 
 		try {
-			Properties props = new Properties();
-			FileInputStream reader = new FileInputStream(SETTINGS_FILE);
+			final Properties props = new Properties();
+			final FileInputStream reader = new FileInputStream(settingsFile);
 			props.load(reader);
 			reader.close();
+			settings.readProperties(props);
 
-			if (props.get("drakensang.home") != null) {
-				settings.setDrakensangHome(new File(props
-						.getProperty("drakensang.home")));
-			}
-
-			if (props.get("latestKnownFeature") != null) {
-				settings.setLatestKnownFeature(Integer.valueOf(props
-						.getProperty("latestKnownFeature")));
-			}
-
-			if (props.get("backups.directory") != null) {
-				settings.setBackupDirectory(new File(props
-						.getProperty("backups.directory")));
-			}
-
-			if (props.get("backups.enabled") != null) {
-				settings.setCreateBackupOnSave(Boolean.parseBoolean(props
-						.getProperty("backups.enabled")));
-			}
-
-			if (props.get("locale.language") != null) {
-				final String language = props.getProperty("locale.language");
-				final String country = props.getProperty("locale.country");
-				final String variant = props.getProperty("locale.variant");
-				settings.setLocale(new Locale(language, country, variant));
-			}
 		} catch (IOException e) {
-			LOG.info("No settings found at " + SETTINGS_FILE + ": " + e);
-			settings.setLatestKnownFeature(FeatureHistory.getLatestFeatureId());
+			LOG.info("No settings found at " + settingsFile + ": " + e);
+			settings.initialize();
 		}
 
 		LOG.debug("Loaded settings: " + settings);
 
 		return settings;
+	}
+
+	private static Settings createSettingsInstance() {
+		try {
+			return settingsClass.newInstance();
+		} catch (InstantiationException e) {
+			throw new DrakensangException(
+					"Error instanciating settings class: " + e, e);
+		} catch (IllegalAccessException e) {
+			throw new DrakensangException(
+					"Error instanciating settings class: " + e, e);
+		}
 	}
 
 	@Override
