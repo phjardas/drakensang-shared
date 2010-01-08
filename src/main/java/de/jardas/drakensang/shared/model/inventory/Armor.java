@@ -1,6 +1,6 @@
 package de.jardas.drakensang.shared.model.inventory;
 
-public class Armor extends InventoryItem {
+public class Armor extends EquipableItem {
     private int ruestungKopf;
     private int ruestungBrust;
     private int ruestungRuecken;

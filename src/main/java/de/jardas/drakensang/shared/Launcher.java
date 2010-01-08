@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import de.jardas.drakensang.shared.FeatureHistory.Feature;
@@ -26,33 +27,39 @@ public class Launcher {
 	private static JFrame mainFrame;
 	private static ResourceBundle bundle;
 
-	public static void run(Program program) {
-		if (Launcher.program != null) {
-			throw new IllegalStateException("A program is already running!");
-		}
+	public static void run(final Program program) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				if (Launcher.program != null) {
+					throw new IllegalStateException(
+							"A program is already running!");
+				}
 
-		Launcher.program = program;
-		LOG.info("Bootstrapping");
+				Launcher.program = program;
+				LOG.info("Bootstrapping");
 
-		try {
-			bundle = ResourceBundle.getBundle(program.getResourceBundleName());
-			Class.forName("org.sqlite.JDBC");
+				try {
+					bundle = ResourceBundle.getBundle(program
+							.getResourceBundleName());
+					Class.forName("org.sqlite.JDBC");
 
-			checkSettings();
-			Messages.init(program.getResourceBundleName());
-			FeatureHistory.init(program.getFeatureHistory());
+					checkSettings();
+					Messages.init(program.getResourceBundleName());
+					FeatureHistory.init(program.getFeatureHistory());
 
-			final Locale locale = getUserLocale();
+					final Locale locale = getUserLocale();
 
-			if (locale != null) {
-				setUserLocale(locale);
-				runGUI();
-			} else {
-				showLanguageChooser();
+					if (locale != null) {
+						setUserLocale(locale);
+						runGUI();
+					} else {
+						showLanguageChooser();
+					}
+				} catch (Exception e) {
+					handleException(e);
+				}
 			}
-		} catch (Exception e) {
-			handleException(e);
-		}
+		});
 	}
 
 	public static JFrame getMainFrame() {

@@ -17,11 +17,12 @@ public abstract class Settings {
 	private static Settings instance;
 	private static Class<? extends Settings> settingsClass;
 
-	public static void init(String settingsDirectory,
+	public static synchronized void init(String settingsDirectory,
 			Class<? extends Settings> settingsClass) {
-		Settings.settingsDirectory = new File(System.getProperty("user.home"),
-				settingsDirectory);
-		settingsFile = new File(settingsDirectory, "settings.properties");
+		Settings.settingsDirectory = new File(new File(System
+				.getProperty("user.home")), settingsDirectory);
+		settingsFile = new File(Settings.settingsDirectory,
+				"settings.properties");
 		Settings.settingsClass = settingsClass;
 	}
 
@@ -30,6 +31,10 @@ public abstract class Settings {
 	}
 
 	public static synchronized Settings getInstance() {
+		if (settingsDirectory == null) {
+			throw new RuntimeException("Settings were not initialized!");
+		}
+
 		if (instance == null) {
 			instance = load();
 		}

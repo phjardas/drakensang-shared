@@ -1,6 +1,6 @@
 package de.jardas.drakensang.shared.model.inventory;
 
-public class Shield extends InventoryItem {
+public class Shield extends EquipableItem {
     private int attackeMod;
     private int paradeMod;
 

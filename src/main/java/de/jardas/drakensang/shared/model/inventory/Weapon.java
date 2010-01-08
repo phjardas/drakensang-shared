@@ -2,8 +2,7 @@ package de.jardas.drakensang.shared.model.inventory;
 
 import de.jardas.drakensang.shared.model.Schaden;
 
-public class Weapon extends InventoryItem {
-	private Type equipmentType;
+public class Weapon extends EquipableItem {
 	private Schaden schaden;
 	private int attackeMod;
 	private int paradeMod;
@@ -30,17 +29,5 @@ public class Weapon extends InventoryItem {
 
 	public void setSchaden(Schaden schaden) {
 		this.schaden = schaden;
-	}
-
-	public Type getEquipmentType() {
-		return equipmentType;
-	}
-
-	public void setEquipmentType(Type equipmentType) {
-		this.equipmentType = equipmentType;
-	}
-
-	public static enum Type {
-		OneHandWeapon, TwoHandWeapon, TwoHandWeaponLeft;
 	}
 }

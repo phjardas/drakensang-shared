@@ -3,7 +3,7 @@ package de.jardas.drakensang.shared.model;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-public abstract class Persistable {
+public abstract class Persistable implements Identified {
 	private byte[] guid;
 	private String id;
 	private String name;

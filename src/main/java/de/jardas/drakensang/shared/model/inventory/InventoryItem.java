@@ -26,7 +26,6 @@ public abstract class InventoryItem extends Persistable {
 	private int taBonus;
 	private String useTalent;
 	private boolean canDestroy;
-	private EquipmentSlot slot;
 	private String level;
 	private byte[] storageGuid;
 
@@ -62,14 +61,6 @@ public abstract class InventoryItem extends Persistable {
 
 	public boolean isCountable() {
 		return countable;
-	}
-
-	public EquipmentSlot getSlot() {
-		return slot;
-	}
-
-	public void setSlot(EquipmentSlot slot) {
-		this.slot = slot;
 	}
 
 	public boolean isQuestItem() {

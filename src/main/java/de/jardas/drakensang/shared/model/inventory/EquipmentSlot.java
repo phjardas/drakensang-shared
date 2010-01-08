@@ -14,5 +14,11 @@ public enum EquipmentSlot {
 	Quiver,
 	Gloves,
 	ArmArmor,
-	LegArmor;
+	LegArmor,
+	Shirt,
+	Body_Plate,
+	Belt,
+	Ring,
+	Knee,
+	Decoration;
 }
