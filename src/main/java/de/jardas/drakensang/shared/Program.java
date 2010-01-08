@@ -4,12 +4,12 @@ import java.io.InputStream;
 
 import javax.swing.JFrame;
 
-public interface Program {
-	void showMainFrame();
+public interface Program<F extends JFrame> {
+	F createMainFrame();
+
+	void onMainFrameVisible(F mainFrame);
 
 	void shutDown();
-
-	JFrame getMainFrame();
 
 	String getResourceBundleName();
 

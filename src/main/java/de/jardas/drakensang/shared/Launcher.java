@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
@@ -18,18 +19,19 @@ import de.jardas.drakensang.shared.gui.NewFeaturesDialog;
 import de.jardas.drakensang.shared.gui.WordWrap;
 import de.jardas.drakensang.shared.registry.DrakensangHomeFinder;
 
-public class Launcher implements Runnable {
+public class Launcher {
 	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
 			.getLogger(Launcher.class);
-	private final Program program;
-	private ResourceBundle bundle;
+	private static Program program;
+	private static JFrame mainFrame;
+	private static ResourceBundle bundle;
 
-	public Launcher(Program program) {
-		super();
-		this.program = program;
-	}
+	public static void run(Program program) {
+		if (Launcher.program != null) {
+			throw new IllegalStateException("A program is already running!");
+		}
 
-	public void run() {
+		Launcher.program = program;
 		LOG.info("Bootstrapping");
 
 		try {
@@ -44,7 +46,7 @@ public class Launcher implements Runnable {
 
 			if (locale != null) {
 				setUserLocale(locale);
-				showMainFrame();
+				runGUI();
 			} else {
 				showLanguageChooser();
 			}
@@ -53,7 +55,11 @@ public class Launcher implements Runnable {
 		}
 	}
 
-	private void showMainFrame() {
+	public static JFrame getMainFrame() {
+		return mainFrame;
+	}
+
+	private static void runGUI() {
 		final Feature[] features = FeatureHistory.getUnknownFeatures(Settings
 				.getInstance());
 
@@ -61,17 +67,19 @@ public class Launcher implements Runnable {
 			new NewFeaturesDialog(features, null).setVisible(true);
 		}
 
-		program.showMainFrame();
+		mainFrame = program.createMainFrame();
+		mainFrame.setVisible(true);
+		program.onMainFrameVisible(mainFrame);
 	}
 
-	private void showLanguageChooser() {
+	private static void showLanguageChooser() {
 		LOG.debug("Showing language chooser dialog.");
 		new LocaleChooserDialog() {
 			@Override
 			public void onLocaleChosen(Locale locale) {
 				setVisible(false);
 				setUserLocale(locale);
-				showMainFrame();
+				runGUI();
 			}
 
 			@Override
@@ -81,18 +89,22 @@ public class Launcher implements Runnable {
 		};
 	}
 
-	public void handleException(Exception e) {
+	public static void handleException(Exception e) {
 		LOG.error("Uncaught exception: " + e, e);
 		program.shutDown();
 
-		new ExceptionDialog(program.getMainFrame(), e).setVisible(true);
+		if (mainFrame != null) {
+			mainFrame.setVisible(false);
+		}
+
+		new ExceptionDialog(mainFrame, e).setVisible(true);
 
 		LOG.info("Shutting down...");
 
 		System.exit(1);
 	}
 
-	public String getCurrentVersion() {
+	public static String getCurrentVersion() {
 		ResourceBundle bundle = ResourceBundle.getBundle(Launcher.class
 				.getPackage().getName()
 				+ ".version");
@@ -100,7 +112,7 @@ public class Launcher implements Runnable {
 		return bundle.getString("version");
 	}
 
-	private void checkSettings() {
+	private static void checkSettings() {
 		final Settings settings = Settings.getInstance();
 		LOG.debug("Testing connection to "
 				+ Settings.getInstance().getDrakensangHome());
@@ -124,7 +136,7 @@ public class Launcher implements Runnable {
 		}
 	}
 
-	private Locale getUserLocale() {
+	private static Locale getUserLocale() {
 		final Locale locale = Settings.getInstance().getLocale();
 
 		if (locale != null) {
@@ -142,7 +154,7 @@ public class Launcher implements Runnable {
 		}
 	}
 
-	public void setUserLocale(Locale locale) {
+	public static void setUserLocale(Locale locale) {
 		LOG.debug("Setting locale to '" + locale + "'.");
 		Locale.setDefault(locale);
 		Settings.getInstance().setLocale(locale);
@@ -152,7 +164,7 @@ public class Launcher implements Runnable {
 		bundle = ResourceBundle.getBundle(program.getResourceBundleName());
 	}
 
-	private File locateDrakensangHome(Settings settings) {
+	private static File locateDrakensangHome(Settings settings) {
 		JOptionPane.showMessageDialog(null, WordWrap.addNewlines(bundle
 				.getString("drakensang.home.info")), bundle
 				.getString("drakensang.home.title"),
