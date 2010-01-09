@@ -70,7 +70,7 @@ public abstract class EnumComboBox<E extends Enum<E>> extends JComboBox {
 		}
 	}
 
-	private String getLabel(String key) {
+	protected String getLabel(String key) {
 		return Messages.get(key);
 	}
 

@@ -1,7 +1,7 @@
 package de.jardas.drakensang.shared.model;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,8 +9,15 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 public abstract class IntegerMap {
+	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
 	private final Map<String, Integer> values = new HashMap<String, Integer>();
-	
+
+	public IntegerMap() {
+		for (String key : getKeys()) {
+			values.put(key, 0);
+		}
+	}
+
 	public boolean contains(String key) {
 		return values.containsKey(key);
 	}
@@ -20,15 +27,31 @@ public abstract class IntegerMap {
 	}
 
 	public void set(String name, int value) {
-		values.put(name, value);
+		final Integer old = get(name);
+
+		if (old == null || old.intValue() != value) {
+			values.put(name, value);
+			firePropertyChangeEvent(name, value);
+		}
 	}
 
 	public abstract String[] getKeys();
 
-	public void load(ResultSet result) throws SQLException {
-		for (String key : getKeys()) {
-			set(key, result.getInt(key));
+	protected void firePropertyChangeEvent(String property, int newValue) {
+		final PropertyChangeEvent event = new PropertyChangeEvent(this,
+				property, null, newValue);
+
+		for (PropertyChangeListener listener : listeners) {
+			listener.propertyChange(event);
 		}
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		listeners.remove(listener);
 	}
 
 	@Override

@@ -26,7 +26,6 @@ import de.jardas.drakensang.shared.model.IntegerMap;
 
 public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 	private static final int COLUMNS = 2;
-	private final List<ChangeListener> changeListeners = new ArrayList<ChangeListener>();
 	private final Map<String, JComponent> labels = new HashMap<String, JComponent>();
 	private final Map<String, JComponent> fields = new HashMap<String, JComponent>();
 	private final Map<String, JComponent> specials = new HashMap<String, JComponent>();
@@ -159,10 +158,6 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 				public void stateChanged(ChangeEvent e) {
 					final int val = ((Number) spinner.getValue()).intValue();
 					handleChange(key, val);
-
-					for (ChangeListener changeListener : changeListeners) {
-						changeListener.valueChanged(key, val);
-					}
 				}
 			});
 
@@ -208,10 +203,6 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 		update();
 	}
 
-	public void addChangeListener(ChangeListener changeListener) {
-		this.changeListeners.add(changeListener);
-	}
-
 	public Map<String, JComponent> getFields() {
 		return this.fields;
 	}
@@ -222,10 +213,6 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 
 	public Map<String, JComponent> getSpecials() {
 		return this.specials;
-	}
-
-	public static interface ChangeListener {
-		void valueChanged(String key, int value);
 	}
 
 	private static class Status {
