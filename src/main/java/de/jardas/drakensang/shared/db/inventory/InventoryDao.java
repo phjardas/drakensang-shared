@@ -3,10 +3,14 @@ package de.jardas.drakensang.shared.db.inventory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import de.jardas.drakensang.shared.DrakensangException;
 import de.jardas.drakensang.shared.model.Character;
 import de.jardas.drakensang.shared.model.inventory.Inventory;
 import de.jardas.drakensang.shared.model.inventory.InventoryItem;
@@ -26,6 +30,29 @@ public class InventoryDao {
 		ITEM_DAOS.add(new RecipeDao());
 		ITEM_DAOS.add(new TorchDao());
 		ITEM_DAOS.add(new BookDao());
+	}
+
+	public static Map<Class<? extends InventoryItem>, Collection<? extends InventoryItem>> getTemplates() {
+		final Map<Class<? extends InventoryItem>, Collection<? extends InventoryItem>> map = new HashMap<Class<? extends InventoryItem>, Collection<? extends InventoryItem>>();
+
+		for (InventoryItemDao<? extends InventoryItem> dao : ITEM_DAOS) {
+			map.put(dao.getItemClass(), getTemplates(dao.getItemClass()));
+		}
+
+		return map;
+	}
+
+	public static <I extends InventoryItem> Collection<I> getTemplates(
+			Class<I> itemClass) {
+		final InventoryItemDao<I> dao = getInventoryItemDao(itemClass);
+
+		try {
+			return dao.getTemplates();
+		} catch (SQLException e) {
+			throw new DrakensangException(
+					"Error loading inventory templates for type "
+							+ itemClass.getSimpleName() + ": " + e, e);
+		}
 	}
 
 	public static void loadInventory(Character character, String tablePrefix,

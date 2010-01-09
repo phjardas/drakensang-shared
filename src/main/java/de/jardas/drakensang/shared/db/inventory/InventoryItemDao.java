@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 import de.jardas.drakensang.shared.DrakensangException;
+import de.jardas.drakensang.shared.db.Static;
 import de.jardas.drakensang.shared.db.UpdateStatementBuilder;
 import de.jardas.drakensang.shared.db.UpdateStatementBuilder.ParameterType;
 import de.jardas.drakensang.shared.model.inventory.Ammo;
@@ -31,6 +32,7 @@ import de.jardas.drakensang.shared.model.inventory.Weapon;
 public abstract class InventoryItemDao<I extends InventoryItem> {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(InventoryItemDao.class);
+	private final Collection<I> templates = new ArrayList<I>();
 	private final Class<I> itemClass;
 	private final String table;
 
@@ -97,7 +99,7 @@ public abstract class InventoryItemDao<I extends InventoryItem> {
 				}
 
 				item.setCanUse(results.getBoolean("CanUse"));
-				
+
 				try {
 					item.setCanDestroy(results.getBoolean("CanDestroy"));
 				} catch (SQLException e) {
@@ -193,8 +195,7 @@ public abstract class InventoryItemDao<I extends InventoryItem> {
 		}
 	}
 
-	public InventoryItem loadItem(String id, String tablePrefix,
-			Connection connection) {
+	public I loadItem(String id, String tablePrefix, Connection connection) {
 		try {
 			final PreparedStatement stmt = connection
 					.prepareStatement("select * from " + tablePrefix + table
@@ -242,5 +243,21 @@ public abstract class InventoryItemDao<I extends InventoryItem> {
 					.append("StackCount = ?", ParameterType.Int, item
 							.getCount());
 		}
+	}
+
+	public Collection<I> getTemplates() throws SQLException {
+		if (!templates.isEmpty()) {
+			return templates;
+		}
+
+		final ResultSet results = Static.getConnection().prepareStatement(
+				"select Id from _Template_" + table).executeQuery();
+
+		while (results.next()) {
+			templates.add(loadItem(results.getString("Id"), "_Template_",
+					Static.getConnection()));
+		}
+
+		return templates;
 	}
 }
