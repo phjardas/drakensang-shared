@@ -18,7 +18,7 @@ import de.jardas.drakensang.shared.Launcher;
 import de.jardas.drakensang.shared.db.Messages;
 
 public class InfoLabel extends JComponent {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(InfoLabel.class);
 	private JLabel nameLabel;
 

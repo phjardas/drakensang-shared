@@ -1,7 +1,12 @@
 package de.jardas.drakensang.shared.model;
 
-public enum CasterRace {
+public enum CasterRace implements Identified {
 	human,
 	dwarf,
-	elvish;
+	elvish,
+	;
+	
+	public String getId() {
+		return name();
+	}
 }

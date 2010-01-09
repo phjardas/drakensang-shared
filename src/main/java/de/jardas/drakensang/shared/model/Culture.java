@@ -2,7 +2,7 @@ package de.jardas.drakensang.shared.model;
 
 import de.jardas.drakensang.shared.db.Static;
 
-public enum Culture {
+public enum Culture implements Identified {
 	Amazone,
 	Ambosszwerg,
 	Andergaster,
@@ -14,7 +14,8 @@ public enum Culture {
 	Gjalskerlaender,
 	Novadi,
 	Thorwaler,
-	Waldelf;
+	Waldelf,
+	;
 
 	private final int lebensenergieModifikator;
 	private final int ausdauerModifikator;
@@ -52,5 +53,9 @@ public enum Culture {
 
 	public int getMagieresistenzModifikator() {
 		return magieresistenzModifikator;
+	}
+	
+	public String getId() {
+		return name();
 	}
 }

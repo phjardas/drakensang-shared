@@ -2,7 +2,7 @@ package de.jardas.drakensang.shared.model;
 
 import de.jardas.drakensang.shared.db.Static;
 
-public enum Profession {
+public enum Profession implements Identified {
 	Alchimist, Amazone, Bogenschuetze, Dieb, Einbrecher, Elementarist, Geode, Heilmagier, Kaempfer, Kampfmagier, Krieger, Metamagier, Pirat, Prospektor, Sappeur, Scharlatan, Soeldner, Soldat, Streuner, Stammeskrieger, Waldlaeufer, Zauberweber;
 
 	private final String profession;
@@ -27,6 +27,32 @@ public enum Profession {
 		magieresistenzModifikator = Integer.parseInt(Static.get("MR",
 				specialization, "id", "_template_profession"));
 		karmaModifikator = 0;
+	}
+
+	public static Profession forProfession(String p) {
+		for (Profession prof : values()) {
+			if (prof.getProfession().equals(p)) {
+				return prof;
+			}
+		}
+
+		throw new IllegalArgumentException(
+				"No profession known for profession '" + p + "'");
+	}
+
+	public static Profession forSpecialization(String spec) {
+		for (Profession prof : values()) {
+			if (prof.getSpecialization().equals(spec)) {
+				return prof;
+			}
+		}
+
+		throw new IllegalArgumentException(
+				"No profession known for specialization '" + spec + "'");
+	}
+
+	public String getId() {
+		return name();
 	}
 
 	public int getKarmaModifikator() {

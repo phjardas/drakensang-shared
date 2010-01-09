@@ -1,6 +1,7 @@
 package de.jardas.drakensang.shared.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
@@ -14,6 +15,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import de.jardas.drakensang.shared.FeatureHistory;
@@ -38,7 +40,8 @@ public class ExceptionDialog extends JDialog {
 
 		add(new JLabel("Unfortunately an application failure has occurred."),
 				BorderLayout.NORTH);
-		add(new JTextArea(trace.toString()), BorderLayout.CENTER);
+		add(new JScrollPane(new JTextArea(trace.toString())),
+				BorderLayout.CENTER);
 
 		final JPanel toolbar = new JPanel();
 		toolbar.add(new JButton(new AbstractAction(
@@ -78,7 +81,7 @@ public class ExceptionDialog extends JDialog {
 		}));
 		add(toolbar, BorderLayout.SOUTH);
 
-		pack();
+		setSize(new Dimension(600, 800));
 		setLocationRelativeTo(null);
 	}
 }

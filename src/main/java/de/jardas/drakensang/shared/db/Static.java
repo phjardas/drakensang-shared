@@ -12,63 +12,63 @@ import java.sql.SQLException;
 
 import java.util.MissingResourceException;
 
-
 public class Static {
-    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
-        .getLogger(Static.class);
-    private static Connection connection;
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
+			.getLogger(Static.class);
+	private static Connection connection;
 
-    public static Connection getConnection() {
-        if (connection == null) {
-            connection = loadConnection();
-        }
+	public static Connection getConnection() {
+		if (connection == null) {
+			connection = loadConnection();
+		}
 
-        return connection;
-    }
+		return connection;
+	}
 
-    private static Connection loadConnection() {
-        File home = Settings.getInstance().getDrakensangHome();
-        File localeFile = new File(home, "export/db/static.db4");
-        String url = "jdbc:sqlite:/" + localeFile.getAbsolutePath();
-        LOG.debug("Opening static values connection to " + url);
+	private static Connection loadConnection() {
+		File home = Settings.getInstance().getDrakensangHome();
+		File localeFile = new File(home, "export/db/static.db4");
+		String url = "jdbc:sqlite:/" + localeFile.getAbsolutePath();
+		LOG.debug("Opening static values connection to {}", url);
 
-        try {
-            return DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                "Error opening static values connection to " + localeFile
-                + ": " + e, e);
-        }
-    }
+		try {
+			return DriverManager.getConnection(url);
+		} catch (SQLException e) {
+			throw new RuntimeException(
+					"Error opening static values connection to " + localeFile
+							+ ": " + e, e);
+		}
+	}
 
-    public static String get(String col, String key, String idCol, String table) {
-        LOG.debug("Loading static value " + col + " from table " + table
-            + " where " + idCol + " = '" + key + "'.");
+	public static String get(String col, String key, String idCol, String table) {
+		LOG.debug("Loading static value {} from table {} where {} = '{}'.",
+				new Object[] { col, table, idCol, key });
 
-        String sql = "select " + col + " from " + table + " where " + idCol
-            + " = ?";
+		String sql = "select " + col + " from " + table + " where " + idCol
+				+ " = ?";
 
-        try {
-            PreparedStatement stmt = getConnection().prepareStatement(sql);
-            stmt.setString(1, key);
+		try {
+			PreparedStatement stmt = getConnection().prepareStatement(sql);
+			stmt.setString(1, key);
 
-            ResultSet result = stmt.executeQuery();
+			ResultSet result = stmt.executeQuery();
 
-            if (!result.next()) {
-                LOG.warn("Missing static value " + col + " from table " + table
-                    + " where " + idCol + " = '" + key + "'.");
-                throw new MissingResourceException(
-                    "No static value found in table '" + table + "' for '"
-                    + key + "'.", Messages.class.getName(), key);
-            }
+			if (!result.next()) {
+				LOG.warn("Missing static value " + col + " from table " + table
+						+ " where " + idCol + " = '" + key + "'.");
+				throw new MissingResourceException(
+						"No static value found in table '" + table + "' for '"
+								+ key + "'.", Messages.class.getName(), key);
+			}
 
-            return result.getString(col);
-        } catch (SQLException e) {
-            LOG.warn("Error loading static value " + col + " from table "
-                + table + " where " + idCol + " = '" + key + "': " + e);
-            throw new MissingResourceException(
-                "Error looking up static value in table '" + table + "' for '"
-                + key + "' (" + sql + "): " + e, Messages.class.getName(), key);
-        }
-    }
+			return result.getString(col);
+		} catch (SQLException e) {
+			LOG.warn("Error loading static value " + col + " from table "
+					+ table + " where " + idCol + " = '" + key + "': " + e);
+			throw new MissingResourceException(
+					"Error looking up static value in table '" + table
+							+ "' for '" + key + "' (" + sql + "): " + e,
+					Messages.class.getName(), key);
+		}
+	}
 }

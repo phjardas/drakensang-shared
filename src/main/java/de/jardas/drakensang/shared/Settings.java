@@ -10,7 +10,7 @@ import java.util.Properties;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public abstract class Settings {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(Settings.class);
 	private static File settingsDirectory;
 	private static File settingsFile;
@@ -113,7 +113,7 @@ public abstract class Settings {
 		try {
 			settingsFile.getParentFile().mkdirs();
 			props.store(new FileOutputStream(settingsFile), null);
-			LOG.debug("Settings saved to " + settingsFile + ".");
+			LOG.debug("Settings saved to {}.", settingsFile);
 		} catch (IOException e) {
 			LOG
 					.error("Error writing settings to " + settingsFile + ": "
@@ -134,11 +134,11 @@ public abstract class Settings {
 			settings.readProperties(props);
 
 		} catch (IOException e) {
-			LOG.info("No settings found at " + settingsFile + ": " + e);
+			LOG.info("No settings found at {}: {}", settingsFile, e);
 			settings.initialize();
 		}
 
-		LOG.debug("Loaded settings: " + settings);
+		LOG.debug("Loaded settings: {}", settings);
 
 		return settings;
 	}

@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 
 public final class WindowsRegistry {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(WindowsRegistry.class);
 	private static final String REGQUERY_UTIL = "reg query ";
 	private static final String REGSTR_TOKEN = "REG_SZ";
@@ -61,15 +61,14 @@ public final class WindowsRegistry {
 			int p = result.indexOf(REGSTR_TOKEN);
 
 			if (p == -1) {
-				LOG.debug("No value found in registry for '" + query + "'.");
+				LOG.debug("No value found in registry for '{}'.", query);
 
 				return null;
 			}
 
 			final String value = result.substring(p + REGSTR_TOKEN.length())
 					.trim();
-			LOG.debug("Registry value '" + query + "' resolved to '" + value
-					+ "'.");
+			LOG.debug("Registry value '{}' resolved to '{}'.", query, value);
 
 			return value;
 		} catch (Exception e) {

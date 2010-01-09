@@ -21,7 +21,7 @@ import de.jardas.drakensang.shared.gui.WordWrap;
 import de.jardas.drakensang.shared.registry.DrakensangHomeFinder;
 
 public class Launcher {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(Launcher.class);
 	private static Program program;
 	private static JFrame mainFrame;
@@ -121,8 +121,8 @@ public class Launcher {
 
 	private static void checkSettings() {
 		final Settings settings = Settings.getInstance();
-		LOG.debug("Testing connection to "
-				+ Settings.getInstance().getDrakensangHome());
+		LOG.debug("Testing connection to {}", Settings.getInstance()
+				.getDrakensangHome());
 
 		if (!Messages.testConnection()) {
 			Messages.resetConnection();
@@ -147,7 +147,7 @@ public class Launcher {
 		final Locale locale = Settings.getInstance().getLocale();
 
 		if (locale != null) {
-			LOG.info("Found locale in settings: " + locale);
+			LOG.info("Found locale in settings: {}", locale);
 
 			return locale;
 		}
@@ -162,7 +162,7 @@ public class Launcher {
 	}
 
 	public static void setUserLocale(Locale locale) {
-		LOG.debug("Setting locale to '" + locale + "'.");
+		LOG.debug("Setting locale to '{}'", locale);
 		Locale.setDefault(locale);
 		Settings.getInstance().setLocale(locale);
 		Settings.getInstance().save();

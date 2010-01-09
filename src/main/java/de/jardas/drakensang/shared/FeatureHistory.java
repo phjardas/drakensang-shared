@@ -12,7 +12,7 @@ import org.dom4j.io.SAXReader;
 
 @SuppressWarnings("unchecked")
 public final class FeatureHistory {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(FeatureHistory.class);
 	private static final List<Feature> FEATURES = new ArrayList<Feature>();
 
@@ -37,7 +37,7 @@ public final class FeatureHistory {
 					feature.addDescription(lang, descr);
 				}
 
-				LOG.debug("Feature #" + FEATURES.size() + ": " + feature);
+				LOG.debug("Feature #{}: {}", FEATURES.size(), feature);
 				FEATURES.add(feature);
 			}
 		} catch (Exception e) {

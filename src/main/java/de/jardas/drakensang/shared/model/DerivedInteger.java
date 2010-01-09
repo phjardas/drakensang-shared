@@ -5,19 +5,19 @@ import java.beans.PropertyChangeListener;
 
 public abstract class DerivedInteger {
 	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
-	private final Character character;
+	private final Person person;
 	private int value;
 
-	protected DerivedInteger(Character character, String... properties) {
-		this.character = character;
-		character.addPropertyChangeListener(new PropertyChangeListener() {
+	protected DerivedInteger(Person person, String... properties) {
+		this.person = person;
+		person.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				updateDerivedValue(DerivedInteger.this.character);
+				updateDerivedValue(DerivedInteger.this.person);
 			}
 		}, properties);
 	}
 
-	protected abstract void updateDerivedValue(Character character);
+	protected abstract void updateDerivedValue(Person person);
 
 	public int getValue() {
 		return value;

@@ -2,7 +2,7 @@ package de.jardas.drakensang.shared.model;
 
 import de.jardas.drakensang.shared.db.Static;
 
-public enum Race {
+public enum Race implements Identified {
 	Elf, Halbelf, Mittellaender, Thorwaler, Tulamide, Zwerg;
 
 	private final int lebensenergieModifikator;
@@ -20,6 +20,10 @@ public enum Race {
 				"id", "_template_race"));
 		magieresistenzModifikator = Integer.parseInt(Static.get("MR", name(),
 				"id", "_template_race"));
+	}
+	
+	public String getId() {
+		return name();
 	}
 
 	public int getKarmaModifikator() {

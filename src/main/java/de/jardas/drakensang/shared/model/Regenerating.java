@@ -8,25 +8,30 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 public abstract class Regenerating {
 	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
-	private final Character character;
+	private final Person person;
+	private final String name;
 	private int currentValue;
 	private int maxValue;
 	private int regenerationAmount;
 	private int regenerationFrequency;
 	private int regenerationFrequencyCombat;
+	private final boolean hasBonus;
 	private int bonus;
 
-	protected Regenerating(Character character, String... properties) {
-		this.character = character;
+	protected Regenerating(String name, Person person, boolean hasBonus,
+			String... properties) {
+		this.name = name;
+		this.person = person;
+		this.hasBonus = hasBonus;
 
-		character.addPropertyChangeListener(new PropertyChangeListener() {
+		person.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				updateDerivedValues(Regenerating.this.character);
+				updateDerivedValues(Regenerating.this.person);
 			}
 		}, properties);
 	}
 
-	protected abstract void updateDerivedValues(Character character);
+	protected abstract void updateDerivedValues(Person person);
 
 	public int getCurrentValue() {
 		return currentValue;
@@ -96,11 +101,23 @@ public abstract class Regenerating {
 	}
 
 	public void setBonus(int bonus) {
+		if (!hasBonus) {
+			throw new IllegalArgumentException(getName() + " has no bonus.");
+		}
+
 		if (bonus != this.bonus) {
 			this.bonus = bonus;
 			firePropertyChangeEvent("bonus", bonus);
-			updateDerivedValues(character);
+			updateDerivedValues(person);
 		}
+	}
+
+	public boolean hasBonus() {
+		return hasBonus;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	protected void firePropertyChangeEvent(String property, int newValue) {

@@ -6,10 +6,9 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 
 public enum LocaleOption {
-	GERMAN(Locale.GERMANY, "Folge dem Meister"),
-	ENGLISH(Locale.UK, "");
+	GERMAN(Locale.GERMANY, "Folge dem Meister"), ENGLISH(Locale.UK, "");
 
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(LocaleOption.class);
 	private final Locale locale;
 	private final String translation;
@@ -34,8 +33,8 @@ public enum LocaleOption {
 
 			for (LocaleOption option : values()) {
 				if (option.isMyLanguage(msg)) {
-					LOG.info("Test message '" + msg + "' resolved to locale '"
-							+ option.getLocale() + "'.");
+					LOG.info("Test message '{}' resolved to locale '{}'.", msg,
+							option.getLocale());
 
 					return option.getLocale();
 				}

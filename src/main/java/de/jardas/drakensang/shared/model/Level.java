@@ -5,7 +5,7 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import de.jardas.drakensang.shared.db.Messages;
 
 
-public class Level {
+public class Level implements Identified {
     private String id;
     private String name;
     private String worldMapLocation;

@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 import de.jardas.drakensang.shared.Settings;
 
 public class Messages {
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(Messages.class);
 	private static final Map<String, String> CACHE = new HashMap<String, String>();
 	private static String bundleName;
@@ -30,10 +30,8 @@ public class Messages {
 	public static void reload() {
 		final Locale locale = Locale.getDefault();
 
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Loading resources for locale '" + locale + "' from '"
-					+ bundleName + "'.");
-		}
+		LOG.info("Loading resources for locale '{}' from '{}'.", locale,
+				bundleName);
 
 		final ResourceBundle bundle = ResourceBundle.getBundle(bundleName,
 				locale);
@@ -43,10 +41,7 @@ public class Messages {
 			final String key = keys.nextElement();
 			final String value = bundle.getString(key);
 
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Caching message '" + key + "' with value '" + value
-						+ "'.");
-			}
+			LOG.debug("Caching message '{}' with value '{}'.", key, value);
 
 			cache(key, value);
 		}
@@ -68,7 +63,7 @@ public class Messages {
 		File home = Settings.getInstance().getDrakensangHome();
 		File localeFile = new File(home, "export/db/locale.db4");
 		String url = "jdbc:sqlite:/" + localeFile.getAbsolutePath();
-		LOG.debug("Opening localization connection to " + url);
+		LOG.debug("Opening localization connection to {}", url);
 
 		try {
 			return DriverManager.getConnection(url);
@@ -112,8 +107,8 @@ public class Messages {
 
 	public static String get(String col, String key, String idCol, String table) {
 		try {
-			LOG.debug("Loading " + col + " from " + table + " where " + idCol
-					+ " = '" + key + "'.");
+			LOG.debug("Loading {} from {} where {} = '{}'.", new Object[] {
+					col, table, idCol, key });
 
 			PreparedStatement stmt = getConnection().prepareStatement(
 					"select " + col + " from " + table + " where " + idCol

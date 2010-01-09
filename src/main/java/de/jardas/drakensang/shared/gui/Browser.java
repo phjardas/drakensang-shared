@@ -1,11 +1,11 @@
 package de.jardas.drakensang.shared.gui;
 
 public final class Browser {
-    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(Browser.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Browser.class);
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
     static {
-        LOG.debug("Operating system: '" + OS + "'.");
+        LOG.debug("Operating system: '{}'.", OS);
     }
 
     public static void open(String url) {
