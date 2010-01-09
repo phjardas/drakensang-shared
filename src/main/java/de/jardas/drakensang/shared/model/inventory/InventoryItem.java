@@ -7,7 +7,6 @@ import de.jardas.drakensang.shared.model.Persistable;
 
 public abstract class InventoryItem extends Persistable {
 	private final boolean countable;
-	private Inventory inventory;
 	private int count;
 	private int maxCount;
 	private boolean questItem;
@@ -19,9 +18,6 @@ public abstract class InventoryItem extends Persistable {
 	private String physics;
 	private String lookAtText;
 	private String questId;
-	private String scriptPreset;
-	private String scriptOverride;
-	private String limitedScript;
 	private boolean canUse;
 	private int taBonus;
 	private String useTalent;
@@ -87,14 +83,6 @@ public abstract class InventoryItem extends Persistable {
 		this.icon = icon;
 	}
 
-	public Inventory getInventory() {
-		return inventory;
-	}
-
-	public void setInventory(Inventory inventory) {
-		this.inventory = inventory;
-	}
-
 	public boolean isCanDestroy() {
 		return this.canDestroy;
 	}
@@ -117,14 +105,6 @@ public abstract class InventoryItem extends Persistable {
 
 	public void setGraphics(String graphics) {
 		this.graphics = graphics;
-	}
-
-	public String getLimitedScript() {
-		return this.limitedScript;
-	}
-
-	public void setLimitedScript(String limitedScript) {
-		this.limitedScript = limitedScript;
 	}
 
 	public String getLookAtText() {
@@ -157,22 +137,6 @@ public abstract class InventoryItem extends Persistable {
 
 	public void setQuestId(String questId) {
 		this.questId = questId;
-	}
-
-	public String getScriptOverride() {
-		return this.scriptOverride;
-	}
-
-	public void setScriptOverride(String scriptOverride) {
-		this.scriptOverride = scriptOverride;
-	}
-
-	public String getScriptPreset() {
-		return this.scriptPreset;
-	}
-
-	public void setScriptPreset(String scriptPreset) {
-		this.scriptPreset = scriptPreset;
 	}
 
 	public int getTaBonus() {

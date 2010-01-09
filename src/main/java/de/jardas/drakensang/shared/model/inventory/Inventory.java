@@ -12,7 +12,6 @@ public class Inventory {
 
 	public void addItem(InventoryItem item) {
 		items.add(item);
-		item.setInventory(this);
 	}
 
 	@SuppressWarnings("unchecked")

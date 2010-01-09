@@ -2,12 +2,14 @@ package de.jardas.drakensang.shared.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 public abstract class Regenerating {
-	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
+	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
+			this);
 	private final Person person;
 	private final String name;
 	private int currentValue;
@@ -24,11 +26,14 @@ public abstract class Regenerating {
 		this.person = person;
 		this.hasBonus = hasBonus;
 
-		person.addPropertyChangeListener(new PropertyChangeListener() {
+		final PropertyChangeListener propertyChangeListener = new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
 				updateDerivedValues(Regenerating.this.person);
 			}
-		}, properties);
+		};
+
+		person.addPropertyChangeListener(propertyChangeListener, properties);
+		addPropertyChangeListener(propertyChangeListener);
 	}
 
 	protected abstract void updateDerivedValues(Person person);
@@ -40,9 +45,9 @@ public abstract class Regenerating {
 	public void setCurrentValue(int currentValue) {
 		if (currentValue > getMaxValue()) {
 			setCurrentValue(maxValue);
-		} else if (currentValue != this.currentValue) {
-			this.currentValue = currentValue;
-			firePropertyChangeEvent("currentValue", currentValue);
+		} else {
+			listeners.firePropertyChange("currentValue", this.currentValue,
+					this.currentValue = currentValue);
 		}
 	}
 
@@ -51,13 +56,11 @@ public abstract class Regenerating {
 	}
 
 	protected void setMaxValue(int maxValue) {
-		if (maxValue != this.maxValue) {
-			this.maxValue = maxValue;
-			firePropertyChangeEvent("maxValue", maxValue);
+		listeners.firePropertyChange("maxValue", this.maxValue,
+				this.maxValue = maxValue);
 
-			if (getCurrentValue() > maxValue) {
-				setCurrentValue(maxValue);
-			}
+		if (getCurrentValue() > maxValue) {
+			setCurrentValue(maxValue);
 		}
 	}
 
@@ -66,10 +69,9 @@ public abstract class Regenerating {
 	}
 
 	public void setRegenerationAmount(int regenerationAmount) {
-		if (regenerationAmount != this.regenerationAmount) {
-			this.regenerationAmount = regenerationAmount;
-			firePropertyChangeEvent("regenerationAmount", regenerationAmount);
-		}
+		listeners.firePropertyChange("regenerationAmount",
+				this.regenerationAmount,
+				this.regenerationAmount = regenerationAmount);
 	}
 
 	public int getRegenerationFrequency() {
@@ -77,11 +79,9 @@ public abstract class Regenerating {
 	}
 
 	public void setRegenerationFrequency(int regenerationFrequency) {
-		if (regenerationFrequency != this.regenerationFrequency) {
-			this.regenerationFrequency = regenerationFrequency;
-			firePropertyChangeEvent("regenerationFrequency",
-					regenerationFrequency);
-		}
+		listeners.firePropertyChange("regenerationFrequency",
+				this.regenerationFrequency,
+				this.regenerationFrequency = regenerationFrequency);
 	}
 
 	public int getRegenerationFrequencyCombat() {
@@ -89,11 +89,9 @@ public abstract class Regenerating {
 	}
 
 	public void setRegenerationFrequencyCombat(int regenerationFrequencyCombat) {
-		if (regenerationFrequencyCombat != this.regenerationFrequencyCombat) {
-			this.regenerationFrequencyCombat = regenerationFrequencyCombat;
-			firePropertyChangeEvent("regenerationFrequencyCombat",
-					regenerationFrequencyCombat);
-		}
+		listeners.firePropertyChange("regenerationFrequencyCombat",
+				this.regenerationFrequencyCombat,
+				this.regenerationFrequencyCombat = regenerationFrequencyCombat);
 	}
 
 	public int getBonus() {
@@ -105,11 +103,7 @@ public abstract class Regenerating {
 			throw new IllegalArgumentException(getName() + " has no bonus.");
 		}
 
-		if (bonus != this.bonus) {
-			this.bonus = bonus;
-			firePropertyChangeEvent("bonus", bonus);
-			updateDerivedValues(person);
-		}
+		listeners.firePropertyChange("bonus", this.bonus, this.bonus = bonus);
 	}
 
 	public boolean hasBonus() {
@@ -120,21 +114,12 @@ public abstract class Regenerating {
 		return name;
 	}
 
-	protected void firePropertyChangeEvent(String property, int newValue) {
-		final PropertyChangeEvent event = new PropertyChangeEvent(this,
-				property, null, newValue);
-
-		for (PropertyChangeListener listener : listeners) {
-			listener.propertyChange(event);
-		}
-	}
-
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		listeners.add(listener);
+		listeners.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		listeners.remove(listener);
+		listeners.removePropertyChangeListener(listener);
 	}
 
 	@Override

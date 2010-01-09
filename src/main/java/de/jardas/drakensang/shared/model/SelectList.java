@@ -1,13 +1,15 @@
 package de.jardas.drakensang.shared.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SelectList<I extends Enum<I>> implements Iterable<I> {
-	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
+public class SelectList<I extends Enum<I>> implements Iterable<I>,
+		PropertyChangeProducer {
+	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
+			this);
 	private final Set<I> items = new HashSet<I>();
 
 	public Set<I> getAll() {
@@ -24,13 +26,13 @@ public class SelectList<I extends Enum<I>> implements Iterable<I> {
 
 	public void add(I item) {
 		if (items.add(item)) {
-			firePropertyChangeEvent(item.name(), true);
+			listeners.firePropertyChange(item.name(), false, true);
 		}
 	}
 
 	public void remove(I item) {
 		if (items.remove(item)) {
-			firePropertyChangeEvent(item.name(), false);
+			listeners.firePropertyChange(item.name(), true, false);
 		}
 	}
 
@@ -38,20 +40,11 @@ public class SelectList<I extends Enum<I>> implements Iterable<I> {
 		return items.size();
 	}
 
-	protected void firePropertyChangeEvent(String property, boolean existing) {
-		final PropertyChangeEvent event = new PropertyChangeEvent(this,
-				property, null, existing);
-
-		for (PropertyChangeListener listener : listeners) {
-			listener.propertyChange(event);
-		}
-	}
-
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		listeners.add(listener);
+		listeners.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		listeners.remove(listener);
+		listeners.removePropertyChangeListener(listener);
 	}
 }

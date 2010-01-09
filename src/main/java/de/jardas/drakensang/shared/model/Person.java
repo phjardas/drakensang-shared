@@ -2,19 +2,21 @@ package de.jardas.drakensang.shared.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.Set;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import de.jardas.drakensang.shared.model.inventory.Inventory;
 import de.jardas.drakensang.shared.model.inventory.Money;
 
-public abstract class Person extends Persistable {
+public abstract class Person extends Persistable implements
+		PropertyChangeProducer {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(Person.class);
-	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
+	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
+			this);
 	private final Talente talente = new Talente();
 	private final Sonderfertigkeiten sonderfertigkeiten = new Sonderfertigkeiten();
 	private final Zauberfertigkeiten zauberfertigkeiten = new Zauberfertigkeiten();
@@ -79,111 +81,63 @@ public abstract class Person extends Persistable {
 		lebensenergie = new Lebensenergie(this, withLEBonus);
 		astralenergie = new Astralenergie(this, withAEBonus);
 
-		attribute.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("attributes." + evt.getPropertyName(),
-						evt.getNewValue());
-			}
-		});
-
+		attribute
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"attributes."));
 		sonderfertigkeiten
-				.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						firePropertyChangeEvent("sonderfertigkeiten."
-								+ evt.getPropertyName(), evt.getNewValue());
-					}
-				});
-
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"sonderfertigkeiten."));
 		zauberfertigkeiten
-				.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						firePropertyChangeEvent("zauberfertigkeiten."
-								+ evt.getPropertyName(), evt.getNewValue());
-					}
-				});
-
-		talente.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("talente." + evt.getPropertyName(), evt
-						.getNewValue());
-			}
-		});
-
-		advantages.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("advantages." + evt.getPropertyName(),
-						evt.getNewValue());
-			}
-		});
-
-		lebensenergie.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("lebensenergie."
-						+ evt.getPropertyName(), evt.getNewValue());
-			}
-		});
-
-		astralenergie.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("astralenergie."
-						+ evt.getPropertyName(), evt.getNewValue());
-			}
-		});
-
-		ausdauer.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("ausdauer." + evt.getPropertyName(),
-						evt.getNewValue());
-			}
-		});
-
-		karma.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("karma." + evt.getPropertyName(), evt
-						.getNewValue());
-			}
-		});
-
-		attackeBasis.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("attackeBasis", evt.getNewValue());
-			}
-		});
-
-		paradeBasis.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("paradeBasis", evt.getNewValue());
-			}
-		});
-
-		fernkampfBasis.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("fernkampfBasis", evt.getNewValue());
-			}
-		});
-
-		magieresistenz.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				firePropertyChangeEvent("magieresistenz", evt.getNewValue());
-			}
-		});
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"zauberfertigkeiten."));
+		talente.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+				"talente."));
+		advantages
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"advantages."));
+		lebensenergie
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"lebensenergie."));
+		astralenergie
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"astralenergie."));
+		ausdauer
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"ausdauer."));
+		karma.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+				"karma."));
+		attackeBasis
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"attackeBasis."));
+		paradeBasis
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"paradeBasis."));
+		fernkampfBasis
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"fernkampfBasis."));
+		magieresistenz
+				.addPropertyChangeListener(new ForwardingPropertyChangeListener(
+						"magieresistenz."));
 	}
 
 	public int getMoneyAmount() {
-		Set<Money> money = getInventory().getItems(Money.class);
+		final Set<Money> money = getInventory().getItems(Money.class);
 
 		return money.isEmpty() ? 0 : money.iterator().next().getCount();
 	}
 
 	public void setMoneyAmount(int amount) {
-		Set<Money> money = getInventory().getItems(Money.class);
+		final Set<Money> moneys = getInventory().getItems(Money.class);
 
-		if (money.size() != 1) {
+		if (moneys.size() != 1) {
 			throw new IllegalArgumentException("The character " + getName()
 					+ " can not carry money.");
 		}
 
-		money.iterator().next().setCount(amount);
+		final Money money = moneys.iterator().next();
+		final int old = money.getCount();
+		money.setCount(amount);
+		firePropertyChange("money", old, amount);
 	}
 
 	public Culture getCulture() {
@@ -191,10 +145,7 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setCulture(Culture culture) {
-		if (culture != this.culture) {
-			this.culture = culture;
-			firePropertyChangeEvent("culture", culture);
-		}
+		firePropertyChange("culture", culture, this.culture = culture);
 	}
 
 	public Profession getProfession() {
@@ -202,10 +153,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setProfession(Profession profession) {
-		if (profession != this.profession) {
-			this.profession = profession;
-			firePropertyChangeEvent("profession", profession);
-		}
+		firePropertyChange("profession", profession,
+				this.profession = profession);
 	}
 
 	public Race getRace() {
@@ -213,10 +162,7 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setRace(Race race) {
-		if (race != this.race) {
-			this.race = race;
-			firePropertyChangeEvent("race", race);
-		}
+		firePropertyChange("race", race, this.race = race);
 	}
 
 	public Sex getSex() {
@@ -224,10 +170,7 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setSex(Sex sex) {
-		if (sex != this.sex) {
-			this.sex = sex;
-			firePropertyChangeEvent("sex", sex);
-		}
+		firePropertyChange("sex", sex, this.sex = sex);
 	}
 
 	public String getLookAtText() {
@@ -235,10 +178,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setLookAtText(String lookAtText) {
-		if (!new EqualsBuilder().append(this.lookAtText, lookAtText).isEquals()) {
-			this.lookAtText = lookAtText;
-			firePropertyChangeEvent("lookAtText", lookAtText);
-		}
+		firePropertyChange("lookAtText", this.lookAtText,
+				this.lookAtText = lookAtText);
 	}
 
 	public boolean isMagician() {
@@ -246,7 +187,10 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setMagician(boolean magician) {
-		this.magician = magician;
+		if (magician != this.magician) {
+			firePropertyChange("magician", this.magician,
+					this.magician = magician);
+		}
 	}
 
 	public CasterType getCasterType() {
@@ -254,7 +198,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setCasterType(CasterType casterType) {
-		this.casterType = casterType;
+		firePropertyChange("casterType", this.casterType,
+				this.casterType = casterType);
 	}
 
 	public CasterRace getCasterRace() {
@@ -262,7 +207,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setCasterRace(CasterRace casterRace) {
-		this.casterRace = casterRace;
+		firePropertyChange("casterRace", this.casterRace,
+				this.casterRace = casterRace);
 	}
 
 	public double getSneakSpeed() {
@@ -270,7 +216,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setSneakSpeed(double sneakSpeed) {
-		this.sneakSpeed = sneakSpeed;
+		firePropertyChange("sneakSpeed", this.sneakSpeed,
+				this.sneakSpeed = sneakSpeed);
 	}
 
 	public double getWalkSpeed() {
@@ -278,7 +225,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setWalkSpeed(double walkSpeed) {
-		this.walkSpeed = walkSpeed;
+		firePropertyChange("walkSpeed", this.walkSpeed,
+				this.walkSpeed = walkSpeed);
 	}
 
 	public double getRunSpeed() {
@@ -286,7 +234,7 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setRunSpeed(double runSpeed) {
-		this.runSpeed = runSpeed;
+		firePropertyChange("runSpeed", this.runSpeed, this.runSpeed = runSpeed);
 	}
 
 	public double getCurrentSpeed() {
@@ -294,7 +242,8 @@ public abstract class Person extends Persistable {
 	}
 
 	public void setCurrentSpeed(double currentSpeed) {
-		this.currentSpeed = currentSpeed;
+		firePropertyChange("currentSpeed", this.currentSpeed,
+				this.currentSpeed = currentSpeed);
 	}
 
 	public Talente getTalente() {
@@ -357,37 +306,41 @@ public abstract class Person extends Persistable {
 		if (!this.initialized) {
 			LOG.debug("Initializing {}", this);
 			this.initialized = true;
-			firePropertyChangeEvent(null, null);
+			firePropertyChange(null, null, null);
 		}
 	}
 
-	protected void firePropertyChangeEvent(String property, Object newValue) {
+	protected void firePropertyChange(String property, Object oldValue,
+			Object newValue) {
 		if (!this.initialized) {
 			return;
 		}
 
-		LOG.debug("Property changed: {} --> {}", property, newValue);
-
-		final PropertyChangeEvent event = new PropertyChangeEvent(this,
-				property, null, newValue);
-
-		for (PropertyChangeListener listener : listeners) {
-			listener.propertyChange(event);
+		if (property != null && LOG.isDebugEnabled()) {
+			LOG.debug("Property {}: {} --> {}", new Object[] { property,
+					oldValue, newValue });
 		}
+
+		listeners.firePropertyChange(property, oldValue, newValue);
+	}
+
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		addPropertyChangeListener(listener, (String[]) null);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener,
 			String... properties) {
 		if (properties != null && properties.length > 0) {
-			listeners.add(new ConfinedPropertyChangeListener(listener,
-					properties));
+			listeners
+					.addPropertyChangeListener(new ConfinedPropertyChangeListener(
+							listener, properties));
 		} else {
-			listeners.add(listener);
+			listeners.addPropertyChangeListener(listener);
 		}
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		listeners.remove(listener);
+		listeners.removePropertyChangeListener(listener);
 	}
 
 	@Override
@@ -433,6 +386,21 @@ public abstract class Person extends Persistable {
 			}
 
 			return false;
+		}
+	}
+
+	private class ForwardingPropertyChangeListener implements
+			PropertyChangeListener {
+		private final String prefix;
+
+		private ForwardingPropertyChangeListener(String prefix) {
+			super();
+			this.prefix = prefix;
+		}
+
+		public void propertyChange(PropertyChangeEvent evt) {
+			firePropertyChange(prefix + evt.getPropertyName(), evt
+					.getOldValue(), evt.getNewValue());
 		}
 	}
 }

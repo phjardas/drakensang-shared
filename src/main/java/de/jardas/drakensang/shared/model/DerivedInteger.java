@@ -2,9 +2,11 @@ package de.jardas.drakensang.shared.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
-public abstract class DerivedInteger {
-	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
+public abstract class DerivedInteger implements PropertyChangeProducer {
+	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
+			this);
 	private final Person person;
 	private int value;
 
@@ -24,27 +26,15 @@ public abstract class DerivedInteger {
 	}
 
 	protected void setValue(int value) {
-		if (value != this.value) {
-			this.value = value;
-			firePropertyChangeEvent("value", value);
-		}
-	}
-
-	protected void firePropertyChangeEvent(String property, int newValue) {
-		final PropertyChangeEvent event = new PropertyChangeEvent(this,
-				property, null, newValue);
-
-		for (PropertyChangeListener listener : listeners) {
-			listener.propertyChange(event);
-		}
+		listeners.firePropertyChange("value", this.value, this.value = value);
 	}
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		listeners.add(listener);
+		listeners.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		listeners.remove(listener);
+		listeners.removePropertyChangeListener(listener);
 	}
 
 	@Override

@@ -7,8 +7,6 @@ import java.util.Map;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import de.jardas.drakensang.shared.model.Identified;
-
 public class ArchetypeId implements Identified {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(ArchetypeId.class);

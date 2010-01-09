@@ -1,15 +1,16 @@
 package de.jardas.drakensang.shared.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-public abstract class IntegerMap {
-	private final EventListeners<PropertyChangeListener> listeners = new EventListeners<PropertyChangeListener>();
+public abstract class IntegerMap implements PropertyChangeProducer {
+	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
+			this);
 	private final Map<String, Integer> values = new HashMap<String, Integer>();
 
 	public IntegerMap() {
@@ -31,27 +32,18 @@ public abstract class IntegerMap {
 
 		if (old == null || old.intValue() != value) {
 			values.put(name, value);
-			firePropertyChangeEvent(name, value);
+			listeners.firePropertyChange(name, old.intValue(), value);
 		}
 	}
 
 	public abstract String[] getKeys();
 
-	protected void firePropertyChangeEvent(String property, int newValue) {
-		final PropertyChangeEvent event = new PropertyChangeEvent(this,
-				property, null, newValue);
-
-		for (PropertyChangeListener listener : listeners) {
-			listener.propertyChange(event);
-		}
-	}
-
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		listeners.add(listener);
+		listeners.addPropertyChangeListener(listener);
 	}
 
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		listeners.remove(listener);
+		listeners.removePropertyChangeListener(listener);
 	}
 
 	@Override
