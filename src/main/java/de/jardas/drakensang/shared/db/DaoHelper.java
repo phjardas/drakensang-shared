@@ -74,7 +74,9 @@ public final class DaoHelper {
 				"\\s*;\\s*");
 
 		for (String token : tokens) {
-			list.add(Advantage.valueOf(token));
+			if (token.length() > 0) {
+				list.add(Advantage.valueOf(token));
+			}
 		}
 	}
 
