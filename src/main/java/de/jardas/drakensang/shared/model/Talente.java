@@ -1,37 +1,44 @@
 package de.jardas.drakensang.shared.model;
 
+import org.apache.commons.lang.StringUtils;
+
 import de.jardas.drakensang.shared.db.Static;
 
-
 public class Talente extends IntegerMap {
-    @Override
-    public String[] getKeys() {
-        return new String[] {
-            "TaArmbrust", "TaDolche", "TaATAdjustDolche", "TaFechtwaffen",
-            "TaATAdjustFechtwaffen", "TaHiebwaffen", "TaATAdjustHiebwaffen",
-            "TaSaebel", "TaATAdjustSaebel", "TaSchwerter", "TaATAdjustSchwerter",
-            "TaSpeere", "TaATAdjustSpeere", "TaStaebe", "TaATAdjustStaebe",
-            "TaZwHiebwaffen", "TaATAdjustZwHiebwaffen", "TaZwSchwerter",
-            "TaATAdjustZwSchwerter", "TaRaufen", "TaATAdjustRaufen", "TaBogen",
-            "TaWurfwaffen", "TaSchleichen", "TaSelbstbeherrschung",
-            "TaSinnenschaerfe", "TaTaschendiebstahl", "TaZwergennase",
-            "TaFallenstellen", "TaPflanzenkunde", "TaTierkunde",
-            "TaWildnisleben", "TaMagiekunde", "TaHeilkundeWunden",
-            "TaHeilkundeGift", "TaGassenwissen", "TaAlchimie", "TaBogenbau",
-            "TaSchmieden", "TaFallenEntschaerfen", "TaSchloesser", "TaFeilschen",
-            "TaEtikette", "TaBetoeren", "TaUeberreden", "TaMenschenkenntnis",
-        };
-    }
+	@Override
+	public String[] getKeys() {
+		return new String[] { "TaArmbrust", "TaDolche", "TaATAdjustDolche",
+				"TaFechtwaffen", "TaATAdjustFechtwaffen", "TaHiebwaffen",
+				"TaATAdjustHiebwaffen", "TaSaebel", "TaATAdjustSaebel",
+				"TaSchwerter", "TaATAdjustSchwerter", "TaSpeere",
+				"TaATAdjustSpeere", "TaStaebe", "TaATAdjustStaebe",
+				"TaZwHiebwaffen", "TaATAdjustZwHiebwaffen", "TaZwSchwerter",
+				"TaATAdjustZwSchwerter", "TaRaufen", "TaATAdjustRaufen",
+				"TaBogen", "TaWurfwaffen", "TaSchleichen",
+				"TaSelbstbeherrschung", "TaSinnenschaerfe",
+				"TaTaschendiebstahl", "TaZwergennase", "TaFallenstellen",
+				"TaPflanzenkunde", "TaTierkunde", "TaWildnisleben",
+				"TaMagiekunde", "TaHeilkundeWunden", "TaHeilkundeGift",
+				"TaGassenwissen", "TaAlchimie", "TaBogenbau", "TaSchmieden",
+				"TaFallenEntschaerfen", "TaSchloesser", "TaFeilschen",
+				"TaEtikette", "TaBetoeren", "TaUeberreden",
+				"TaMenschenkenntnis", };
+	}
 
-    public static String[] getAttributes(String key) {
-        final String t1 = Static.get("TaP1", key, "TaAttr", "_template_talent");
-        final String t2 = Static.get("TaP2", key, "TaAttr", "_template_talent");
-        final String t3 = Static.get("TaP3", key, "TaAttr", "_template_talent");
+	public static String[] getAttributes(String key) {
+		final String t1 = Static.get("TaP1", key, "TaAttr", "_template_talent");
+		final String t2 = Static.get("TaP2", key, "TaAttr", "_template_talent");
+		final String t3 = Static.get("TaP3", key, "TaAttr", "_template_talent");
 
-        return new String[] { t1, t2, t3 };
-    }
-    
-    public static String getNameKey(String key) {
-    	return Static.get("Name", key, "TaAttr", "_Template_Talent");
-    }
+		if (StringUtils.isBlank(t1) || StringUtils.isBlank(t2)
+				|| StringUtils.isBlank(t3)) {
+			return null;
+		}
+
+		return new String[] { t1, t2, t3 };
+	}
+
+	public static String getNameKey(String key) {
+		return Static.get("Name", key, "TaAttr", "_Template_Talent");
+	}
 }

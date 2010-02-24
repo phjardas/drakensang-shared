@@ -7,8 +7,6 @@ public class Challenge {
 				- handicap : 0;
 		final int wx = talentOriginal < handicap ? handicap - talentOriginal
 				: 0;
-		System.out.println(talent);
-		System.out.println(wx);
 
 		int count = 0;
 		int success = 0;
