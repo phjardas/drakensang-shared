@@ -17,6 +17,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 
@@ -30,6 +31,8 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 	private final Map<String, JComponent> fields = new HashMap<String, JComponent>();
 	private final Map<String, JComponent> specials = new HashMap<String, JComponent>();
 	private M values;
+	private int defaultSpinnerMin = -1000;
+	private int defaultSpinnerMax = 1000;
 
 	protected void update() {
 		labels.clear();
@@ -152,8 +155,9 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 
 	protected JComponent createField(final String key, int value) {
 		try {
-			final JSpinner spinner = new JSpinner(new SpinnerNumberModel(value,
-					-1000, 1000, 1));
+			final SpinnerModel model = createSpinnerModel(key, value);
+			final JSpinner spinner = new JSpinner(model);
+
 			spinner.addChangeListener(new javax.swing.event.ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					final int val = ((Number) spinner.getValue()).intValue();
@@ -166,6 +170,11 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 			throw new DrakensangException("Error adding field '" + key
 					+ "' with value " + value + ": " + e, e);
 		}
+	}
+
+	protected SpinnerModel createSpinnerModel(String key, int value) {
+		return new SpinnerNumberModel(value, defaultSpinnerMin,
+				defaultSpinnerMax, 1);
 	}
 
 	protected InfoLabel createLabel(final String key) {
@@ -213,6 +222,14 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 
 	public Map<String, JComponent> getSpecials() {
 		return this.specials;
+	}
+
+	public void setDefaultSpinnerMin(int defaultSpinnerMin) {
+		this.defaultSpinnerMin = defaultSpinnerMin;
+	}
+
+	public void setDefaultSpinnerMax(int defaultSpinnerMax) {
+		this.defaultSpinnerMax = defaultSpinnerMax;
 	}
 
 	private static class Status {
