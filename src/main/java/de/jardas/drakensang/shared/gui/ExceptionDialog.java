@@ -61,10 +61,10 @@ public class ExceptionDialog extends JDialog {
 					final String query = "application="
 							+ URLEncoder.encode(applicationInfo
 									.getApplicationName(), "utf-8")
-							+ "version="
+							+ "&version="
 							+ URLEncoder.encode(applicationInfo.getVersion(),
 									"utf-8")
-							+ "build="
+							+ "&build="
 							+ URLEncoder.encode(applicationInfo.getBuild(),
 									"utf-8") + "&lastFeature="
 							+ FeatureHistory.getLatestFeatureId()
