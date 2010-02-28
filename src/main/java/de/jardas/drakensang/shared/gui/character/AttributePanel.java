@@ -7,7 +7,7 @@ import de.jardas.drakensang.shared.model.Attribute;
 public class AttributePanel extends IntegerMapPanel<Attribute> {
 	public AttributePanel() {
 		setDefaultSpinnerMin(0);
-		setDefaultSpinnerMax(100);
+		setDefaultSpinnerMax(500);
 	}
 
 	@Override
