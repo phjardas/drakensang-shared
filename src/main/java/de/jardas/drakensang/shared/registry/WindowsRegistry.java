@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
+import de.jardas.drakensang.shared.DrakensangException;
+
 public final class WindowsRegistry {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(WindowsRegistry.class);
@@ -25,7 +27,13 @@ public final class WindowsRegistry {
 	}
 
 	public static String getCurrentUserPersonalFolderPath() {
-		return getRegistryValue(PERSONAL_FOLDER);
+		final String reg = getRegistryValue(PERSONAL_FOLDER);
+
+		if (reg == null) {
+			throw new DrakensangException("Could not locate personal folder.");
+		}
+
+		return reg;
 	}
 
 	public static String getDrakensangHome() {

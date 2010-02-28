@@ -4,10 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -49,15 +56,41 @@ public class ExceptionDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					final URL url = new URL(
-							"http://www.jardas.de/drakensang/report.php?version="
-									+ URLEncoder
-											.encode(currentVersion, "utf-8")
-									+ "&lastFeature="
-									+ FeatureHistory.getLatestFeatureId()
-									+ "&stacktrace="
-									+ URLEncoder.encode(trace.toString(),
-											"utf-8"));
-					url.getContent();
+							"http://www.jardas.de/drakensang/report.php");
+					final String query = "version="
+							+ URLEncoder.encode(currentVersion, "utf-8")
+							+ "&lastFeature="
+							+ FeatureHistory.getLatestFeatureId()
+							+ "&stacktrace="
+							+ URLEncoder.encode(trace.toString(), "utf-8")
+							+ "&properties="
+							+ URLEncoder.encode(getSystemProperties(), "utf-8");
+
+					final URLConnection conn = url.openConnection();
+					conn.setDoOutput(true);
+					conn.setUseCaches(false);
+					conn.setRequestProperty("Content-Type",
+							"application/x-www-form-urlencoded; charset=utf-8");
+
+					final OutputStreamWriter out = new OutputStreamWriter(conn
+							.getOutputStream());
+					out.write(query);
+					out.flush();
+					out.close();
+
+					final BufferedReader in = new BufferedReader(
+							new InputStreamReader(conn.getInputStream()));
+
+					while (true) {
+						final String line = in.readLine();
+
+						if (line == null) {
+							break;
+						}
+
+						System.out.println(line);
+					}
+
 					JOptionPane.showMessageDialog(parent,
 							"Your error report has been submitted.",
 							"Thank you!", JOptionPane.INFORMATION_MESSAGE);
@@ -83,5 +116,35 @@ public class ExceptionDialog extends JDialog {
 
 		setSize(new Dimension(600, 800));
 		setLocationRelativeTo(null);
+	}
+
+	private static String getSystemProperties() {
+		final StringBuilder ret = new StringBuilder();
+
+		final List<String> keys = new ArrayList<String>();
+
+		for (Object key : System.getProperties().keySet()) {
+			if (!"line.separator".equals(key) && !"java.class.path".equals(key)
+					&& !"java.library.path".equals(key)
+					&& !"sun.boot.class.path".equals(key)) {
+				keys.add((String) key);
+			}
+		}
+
+		Collections.sort(keys);
+
+		for (String key : keys) {
+			if (ret.length() > 0) {
+				ret.append("\n");
+			}
+
+			ret.append(key + "=" + System.getProperty(key));
+		}
+
+		return ret.toString();
+	}
+
+	public static void main(String[] args) {
+		System.out.println(getSystemProperties());
 	}
 }
