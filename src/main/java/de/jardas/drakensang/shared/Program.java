@@ -14,6 +14,6 @@ public interface Program<F extends JFrame> {
 	String getResourceBundleName();
 
 	InputStream getFeatureHistory();
-	
-	String getCurrentVersion();
+
+	ApplicationInfo getApplicationInfo();
 }

@@ -25,13 +25,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import de.jardas.drakensang.shared.ApplicationInfo;
 import de.jardas.drakensang.shared.FeatureHistory;
 
 public class ExceptionDialog extends JDialog {
-	private static String currentVersion;
+	private static ApplicationInfo applicationInfo;
 
-	public static void setCurrentVersion(String currentVersion) {
-		ExceptionDialog.currentVersion = currentVersion;
+	public static void setApplicationInfo(ApplicationInfo applicationInfo) {
+		ExceptionDialog.applicationInfo = applicationInfo;
 	}
 
 	public ExceptionDialog(final Frame parent, Throwable throwable) {
@@ -57,9 +58,15 @@ public class ExceptionDialog extends JDialog {
 				try {
 					final URL url = new URL(
 							"http://www.jardas.de/drakensang/report.php");
-					final String query = "version="
-							+ URLEncoder.encode(currentVersion, "utf-8")
-							+ "&lastFeature="
+					final String query = "application="
+							+ URLEncoder.encode(applicationInfo
+									.getApplicationName(), "utf-8")
+							+ "version="
+							+ URLEncoder.encode(applicationInfo.getVersion(),
+									"utf-8")
+							+ "build="
+							+ URLEncoder.encode(applicationInfo.getBuild(),
+									"utf-8") + "&lastFeature="
 							+ FeatureHistory.getLatestFeatureId()
 							+ "&stacktrace="
 							+ URLEncoder.encode(trace.toString(), "utf-8")
