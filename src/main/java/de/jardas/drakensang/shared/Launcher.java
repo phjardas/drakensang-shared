@@ -38,6 +38,8 @@ public class Launcher {
 				Launcher.program = program;
 				LOG.info("Bootstrapping");
 
+				ExceptionDialog.setCurrentVersion(program.getCurrentVersion());
+
 				try {
 					bundle = ResourceBundle.getBundle(program
 							.getResourceBundleName());
