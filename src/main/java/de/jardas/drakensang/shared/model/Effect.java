@@ -3,63 +3,64 @@ package de.jardas.drakensang.shared.model;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import de.jardas.drakensang.shared.db.Static;
-
+import de.jardas.drakensang.shared.db.TalentDao;
 
 public class Effect {
-    private final EffectTarget targetType;
-    private final String targetName;
-    private final int modifier;
+	private final EffectTarget targetType;
+	private final String targetName;
+	private final int modifier;
 
-    public Effect(final EffectTarget targetType, final String targetName,
-        final int modifier) {
-        super();
-        this.targetType = targetType;
-        this.targetName = targetName;
-        this.modifier = modifier;
-    }
+	public Effect(final EffectTarget targetType, final String targetName,
+			final int modifier) {
+		super();
+		this.targetType = targetType;
+		this.targetName = targetName;
+		this.modifier = modifier;
+	}
 
-    public int getModifier() {
-        return this.modifier;
-    }
+	public int getModifier() {
+		return this.modifier;
+	}
 
-    public String getTargetName() {
-        return this.targetName;
-    }
+	public String getTargetName() {
+		return this.targetName;
+	}
 
-    public EffectTarget getTargetType() {
-        return this.targetType;
-    }
+	public EffectTarget getTargetType() {
+		return this.targetType;
+	}
 
-    public String getTargetNameKey() {
-        switch (getTargetType()) {
-        case Talent:
-            return Talente.getNameKey(getTargetName());
+	public String getTargetNameKey() {
+		switch (getTargetType()) {
+		case Talent:
+			return TalentDao.valueOf(getTargetName()).getNameKey();
 
-        case MagicResistance:
-            return "Magieresistenz";
+		case MagicResistance:
+			return "Magieresistenz";
 
-        case Life:
-            return "LE";
+		case Life:
+			return "LE";
 
-        case Mana:
-            return "AE";
+		case Mana:
+			return "AE";
 
-        case Endurance:
-            return "AU";
-            
-        case Dodge:
-        	return "Ausweichen";
-            
-        case Spell:
-        	return Static.get("Name", getTargetName(), "ZaAttr", "_Template_Zauber");
+		case Endurance:
+			return "AU";
 
-        default:
-            return getTargetName();
-        }
-    }
+		case Dodge:
+			return "Ausweichen";
 
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
-    }
+		case Spell:
+			return Static.get("Name", getTargetName(), "ZaAttr",
+					"_Template_Zauber");
+
+		default:
+			return getTargetName();
+		}
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this);
+	}
 }

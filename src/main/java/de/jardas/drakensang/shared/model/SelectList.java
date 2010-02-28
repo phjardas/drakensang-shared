@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SelectList<I extends Enum<I>> implements Iterable<I>,
+public class SelectList<I extends Identified> implements Iterable<I>,
 		PropertyChangeProducer {
 	private final PropertyChangeSupport listeners = new PropertyChangeSupport(
 			this);
@@ -26,13 +26,13 @@ public class SelectList<I extends Enum<I>> implements Iterable<I>,
 
 	public void add(I item) {
 		if (items.add(item)) {
-			listeners.firePropertyChange(item.name(), false, true);
+			listeners.firePropertyChange(item.getId(), false, true);
 		}
 	}
 
 	public void remove(I item) {
 		if (items.remove(item)) {
-			listeners.firePropertyChange(item.name(), true, false);
+			listeners.firePropertyChange(item.getId(), true, false);
 		}
 	}
 

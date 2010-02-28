@@ -99,7 +99,8 @@ public class Messages {
 		cache(key, value);
 
 		if (value.startsWith("Obsolete!")) {
-			LOG.warn("Obsolete translation for '" + key + "'");
+			throw new MissingResourceException("Obsolete translation for '"
+					+ key + "'", Messages.class.getName(), key);
 		}
 
 		return value;

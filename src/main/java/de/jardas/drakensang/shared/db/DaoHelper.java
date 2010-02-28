@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
 
-import de.jardas.drakensang.shared.model.Advantage;
 import de.jardas.drakensang.shared.model.Advantages;
 import de.jardas.drakensang.shared.model.CasterRace;
 import de.jardas.drakensang.shared.model.CasterType;
@@ -59,8 +58,8 @@ public final class DaoHelper {
 
 	public static void load(Sonderfertigkeiten list, ResultSet result)
 			throws SQLException {
-		for (Sonderfertigkeit e : Sonderfertigkeit.values()) {
-			final int value = result.getInt(e.name());
+		for (Sonderfertigkeit e : SonderfertigkeitDao.values()) {
+			final int value = result.getInt(e.getAttribute());
 
 			if (value >= 0) {
 				list.add(e);
@@ -75,7 +74,7 @@ public final class DaoHelper {
 
 		for (String token : tokens) {
 			if (token.length() > 0) {
-				list.add(Advantage.valueOf(token));
+				list.add(AdvantageDao.valueOf(token));
 			}
 		}
 	}
@@ -151,8 +150,8 @@ public final class DaoHelper {
 
 	public static void store(UpdateStatementBuilder builder,
 			Sonderfertigkeiten sonderfertigkeiten) {
-		for (Sonderfertigkeit sf : Sonderfertigkeit.values()) {
-			builder.append("'" + sf.name() + "' = ?", sonderfertigkeiten
+		for (Sonderfertigkeit sf : SonderfertigkeitDao.values()) {
+			builder.append("'" + sf.getAttribute() + "' = ?", sonderfertigkeiten
 					.contains(sf) ? 1 : -500);
 		}
 	}
