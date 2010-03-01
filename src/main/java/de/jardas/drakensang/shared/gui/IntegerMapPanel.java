@@ -26,7 +26,6 @@ import de.jardas.drakensang.shared.db.Messages;
 import de.jardas.drakensang.shared.model.IntegerMap;
 
 public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
-	private static final int COLUMNS = 2;
 	private final Map<String, JComponent> labels = new HashMap<String, JComponent>();
 	private final Map<String, JComponent> fields = new HashMap<String, JComponent>();
 	private final Map<String, JComponent> specials = new HashMap<String, JComponent>();
@@ -76,9 +75,7 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 				parent.setBorder(BorderFactory.createTitledBorder(Messages
 						.get(groupKey)));
 				status = new Status();
-				add(parent, new GridBagConstraints(0, parentRow++, 1, 1, 0, 0,
-						GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
-						new Insets(0, 0, 0, 0), 0, 0));
+				addGroup(parent, parentRow++);
 				currentGroupKey = groupKey;
 			}
 
@@ -88,10 +85,26 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 			status.advance();
 		}
 
-		add(new JLabel(), new GridBagConstraints(isGrouped() ? 1 : COLUMNS,
-				isGrouped() ? parentRow : status.getRow(), 1, 1, 1, 1,
-				GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,
-						0, 0, 0), 0, 0));
+		final int spacerCol = isGrouped() ? getColumnCount() : 2;
+		final int spacerRow = isGrouped() ? getRowCount(parentRow) : status
+				.getRow();
+		add(new JLabel(), new GridBagConstraints(spacerCol, spacerRow, 1, 1, 1,
+				1, GridBagConstraints.WEST, GridBagConstraints.BOTH,
+				new Insets(0, 0, 0, 0), 0, 0));
+	}
+
+	protected int getColumnCount() {
+		return 1;
+	}
+
+	protected int getRowCount(int index) {
+		return index;
+	}
+
+	protected void addGroup(JComponent group, int index) {
+		add(group, new GridBagConstraints(0, index, 1, 1, 0, 0,
+				GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
+				new Insets(0, 0, 0, 0), 0, 0));
 	}
 
 	protected JComponent createSpecial(String key) {
@@ -232,7 +245,7 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 		this.defaultSpinnerMax = defaultSpinnerMax;
 	}
 
-	private static class Status {
+	private class Status {
 		private int column = 0;
 		private int row = 0;
 
@@ -247,7 +260,7 @@ public abstract class IntegerMapPanel<M extends IntegerMap> extends JPanel {
 		public void advance() {
 			column += 2;
 
-			if (column >= COLUMNS) {
+			if (column >= 2) {
 				column = 0;
 				row++;
 			}
