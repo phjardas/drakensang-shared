@@ -11,8 +11,9 @@ public final class WindowsRegistry {
 			.getLogger(WindowsRegistry.class);
 	private static final String REGQUERY_UTIL = "reg query ";
 	private static final String REGSTR_TOKEN = "REG_SZ";
+	private static final String REGSTR_EXPAND_TOKEN = "REG_EXPAND_SZ";
 	private static final String PERSONAL_FOLDER = "\"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\"
-			+ "Explorer\\Shell Folders\" /v Personal";
+			+ "Explorer\\User Shell Folders\" /v Personal";
 	private static final String DRAKENSANG_HOME = "\"HKLM\\SOFTWARE\\DTP\\Drakensang_TRoT\""
 			+ " /v target_folder";
 	private static final String DRAKENSANG_DEMO_HOME = "\"HKLM\\SOFTWARE\\DTP\\Drakensang_TRoT_DEMO\""
@@ -58,25 +59,25 @@ public final class WindowsRegistry {
 
 	public static String getRegistryValue(final String query) {
 		try {
-			Process process = Runtime.getRuntime().exec(REGQUERY_UTIL + query);
-			StreamReader reader = new StreamReader(process.getInputStream());
+			final Process process = Runtime.getRuntime().exec(
+					REGQUERY_UTIL + query);
+			final StreamReader reader = new StreamReader(process
+					.getInputStream());
 
 			reader.start();
 			process.waitFor();
 			reader.join();
 
-			String result = reader.getResult();
-			int p = result.indexOf(REGSTR_TOKEN);
+			final String result = reader.getResult();
+			final String value = extractValue(result);
 
-			if (p == -1) {
-				LOG.debug("No value found in registry for '{}'.", query);
-
-				return null;
+			if (value != null) {
+				LOG
+						.debug("Registry value '{}' resolved to '{}'.", query,
+								value);
+			} else {
+				LOG.info("No value found in registry for '{}'.", query);
 			}
-
-			final String value = result.substring(p + REGSTR_TOKEN.length())
-					.trim();
-			LOG.debug("Registry value '{}' resolved to '{}'.", query, value);
 
 			return value;
 		} catch (Exception e) {
@@ -84,6 +85,66 @@ public final class WindowsRegistry {
 
 			return null;
 		}
+	}
+
+	private static String extractValue(final String response) {
+		int p = response.indexOf(REGSTR_EXPAND_TOKEN);
+
+		if (p >= 0) {
+			return expand(response.substring(p + REGSTR_EXPAND_TOKEN.length())
+					.trim());
+		}
+
+		p = response.indexOf(REGSTR_TOKEN);
+
+		if (p < 0) {
+			return null;
+		}
+
+		return response.substring(p + REGSTR_TOKEN.length()).trim();
+	}
+
+	private static String expand(String value) {
+		LOG.debug("Expanding variables in {}", value);
+		final StringBuilder buffer = new StringBuilder();
+		final StringBuilder variable = new StringBuilder();
+		final int len = value.length();
+		int i = 0;
+		boolean inVariable = false;
+
+		while (i < len) {
+			final char c = value.charAt(i);
+
+			if (inVariable) {
+				if (c == '%') {
+					final String var = variable.toString();
+					LOG.debug("Expanding variable {}", var);
+					final String resolved = System.getenv(var);
+
+					if (resolved == null) {
+						throw new IllegalArgumentException(
+								"Unknown environment variable '" + var
+										+ "' in registry value '" + value + "'");
+					}
+
+					buffer.append(resolved);
+					inVariable = false;
+				} else {
+					variable.append(c);
+				}
+			} else {
+				if (c == '%') {
+					variable.setLength(0);
+					inVariable = true;
+				} else {
+					buffer.append(c);
+				}
+			}
+
+			i++;
+		}
+
+		return buffer.toString();
 	}
 
 	private static class StreamReader extends Thread {
