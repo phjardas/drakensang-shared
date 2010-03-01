@@ -23,10 +23,12 @@ import de.jardas.drakensang.shared.registry.DrakensangHomeFinder;
 public class Launcher {
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
 			.getLogger(Launcher.class);
+	@SuppressWarnings("unchecked")
 	private static Program program;
 	private static JFrame mainFrame;
 	private static ResourceBundle bundle;
 
+	@SuppressWarnings("unchecked")
 	public static void run(final Program program) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -69,6 +71,7 @@ public class Launcher {
 		return mainFrame;
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void runGUI() {
 		final Feature[] features = FeatureHistory.getUnknownFeatures(Settings
 				.getInstance());
