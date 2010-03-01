@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.jardas.drakensang.shared.DrakensangException;
-
 public final class PackReader {
 	private PackReader() {
 		// utility class
@@ -28,7 +26,7 @@ public final class PackReader {
 		case 3:
 			return readVersion3(in);
 		default:
-			throw new DrakensangException("Unknown savegame version: " + version);
+			throw new IOException("Unknown savegame version: " + version);
 		}
 	}
 
