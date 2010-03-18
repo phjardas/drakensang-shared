@@ -51,6 +51,8 @@ public final class ZauberfertigkeitDao {
 			Messages.getRequired(nameKey);
 		} catch (MissingResourceException e) {
 			LOG.debug("Skipping obsolete spell " + id);
+			
+			return;
 		}
 
 		final Zauberfertigkeit adv = new Zauberfertigkeit(id, nameKey, infoKey,

@@ -98,7 +98,7 @@ public class Messages {
 		value = get("LocaText", key, "LocaId", "_Locale");
 		cache(key, value);
 
-		if (value.startsWith("Obsolete!")) {
+		if (value.startsWith("Obsolete")) {
 			throw new MissingResourceException("Obsolete translation for '"
 					+ key + "'", Messages.class.getName(), key);
 		}
