@@ -1,81 +1,61 @@
 package de.jardas.drakensang.shared.db;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.MissingResourceException;
-
-import org.apache.commons.lang.ArrayUtils;
-
-import de.jardas.drakensang.shared.DrakensangException;
 import de.jardas.drakensang.shared.model.Sonderfertigkeit;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.util.MissingResourceException;
+
+
 public final class SonderfertigkeitDao {
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
-			.getLogger(SonderfertigkeitDao.class);
-	private static Sonderfertigkeit[] values;
+    private static final org.slf4j.Logger LOG =
+        org.slf4j.LoggerFactory.getLogger(SonderfertigkeitDao.class);
+    private static final EnumerationDao<Sonderfertigkeit> DAO =
+        new EnumerationDao<Sonderfertigkeit>(Sonderfertigkeit.class,
+            "select * from _template_attacks order by id") {
+            @Override
+            protected Sonderfertigkeit create(ResultSet result)
+                throws SQLException {
+                return create(result.getString("Id"), result.getString("Name"),
+                    result.getString("Description"), result.getString("AtAttr"),
+                    result.getString("AttrCategory"));
+            }
 
-	static {
-		LOG.info("Loading attacks");
+            private Sonderfertigkeit create(String id, String nameKey, String infoKey,
+                String attribute, String categoryKey) {
+                if ("None".equals(categoryKey)) {
+                    LOG.debug("Skipping unavailable attack " + id);
 
-		try {
-			final PreparedStatement statement = Static.getConnection()
-					.prepareStatement(
-							"select * from _template_attacks order by id");
-			final ResultSet result = statement.executeQuery();
+                    return null;
+                }
 
-			while (result.next()) {
-				create(result.getString("Id"), result.getString("Name"), result
-						.getString("Description"), result.getString("AtAttr"),
-						result.getString("AttrCategory"));
-			}
-		} catch (SQLException e) {
-			throw new DrakensangException("Error loading attacks: " + e, e);
-		}
+                try {
+                    final String name = Messages.getRequired(nameKey);
+                    final String info = Messages.getRequired(infoKey);
 
-		LOG.info("Loaded " + values.length + " attacks.");
-	}
+                    return new Sonderfertigkeit(id, name, info, attribute, categoryKey);
+                } catch (MissingResourceException e) {
+                    LOG.debug("Skipping obsolete attack " + id);
 
-	private SonderfertigkeitDao() {
-		// utility class
-	}
+                    return null;
+                }
+            }
 
-	private static void create(String id, String nameKey, String infoKey,
-			String attribute, String categoryKey) {
-		if ("None".equals(categoryKey)) {
-			LOG.debug("Skipping unavailable attack " + id);
-			return;
-		}
+            protected boolean isItem(Sonderfertigkeit item, String id) {
+                return item.getAttribute().equals(id);
+            }
+        };
 
-		try {
-			final String name = Messages.getRequired(nameKey);
-			final String info = Messages.getRequired(infoKey);
-			final Sonderfertigkeit adv = new Sonderfertigkeit(id, name, info,
-					attribute, categoryKey);
+    private SonderfertigkeitDao() {
+        // utility class
+    }
 
-			if (values == null) {
-				values = new Sonderfertigkeit[] { adv, };
-			} else {
-				values = (Sonderfertigkeit[]) ArrayUtils.add(values, adv);
-			}
+    public static Sonderfertigkeit valueOf(String attribute) {
+        return DAO.valueOf(attribute);
+    }
 
-			LOG.debug("Loaded attack: {}", adv);
-		} catch (MissingResourceException e) {
-			LOG.debug("Skipping obsolete attack " + id);
-		}
-	}
-
-	public static Sonderfertigkeit valueOf(String id) {
-		for (Sonderfertigkeit adv : values) {
-			if (adv.getAttribute().equals(id)) {
-				return adv;
-			}
-		}
-
-		throw new IllegalArgumentException("Unknown attack: " + id);
-	}
-
-	public static Sonderfertigkeit[] values() {
-		return values;
-	}
+    public static Sonderfertigkeit[] values() {
+        return DAO.values();
+    }
 }

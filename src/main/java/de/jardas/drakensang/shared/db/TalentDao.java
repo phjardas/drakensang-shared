@@ -1,104 +1,89 @@
 package de.jardas.drakensang.shared.db;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.MissingResourceException;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-
-import de.jardas.drakensang.shared.DrakensangException;
 import de.jardas.drakensang.shared.model.Talent;
 
+import org.apache.commons.lang.StringUtils;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.util.MissingResourceException;
+
+
 public final class TalentDao {
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
-			.getLogger(TalentDao.class);
-	private static Talent[] values;
-	private static String[] attributes;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TalentDao.class);
+    private static final TalentDaoHelper DAO = new TalentDaoHelper();
 
-	static {
-		LOG.info("Loading talents");
+    private TalentDao() {
+        // utility class
+    }
 
-		try {
-			final PreparedStatement statement = Static.getConnection()
-					.prepareStatement(
-							"select * from _template_talent order by id");
-			final ResultSet result = statement.executeQuery();
+    public static Talent valueOf(String attribute) {
+        return DAO.valueOf(attribute);
+    }
 
-			while (result.next()) {
-				create(result.getString("Id"), result.getString("Name"), result
-						.getString("Description"), result.getString("TaAttr"),
-						result.getString("TaCategory"), result
-								.getString("TaGroup"),
-						result.getString("TaP1"), result.getString("TaP2"),
-						result.getString("TaP3"));
-			}
-		} catch (SQLException e) {
-			throw new DrakensangException("Error loading talents: " + e, e);
-		}
+    public static Talent[] values() {
+        return DAO.values();
+    }
 
-		LOG.info("Loaded " + values.length + " talents.");
-	}
+    public static String[] attributes() {
+        return DAO.getAttributes();
+    }
 
-	private TalentDao() {
-		// utility class
-	}
+    private static class TalentDaoHelper extends EnumerationDao<Talent> {
+        private final String[] attributes;
 
-	private static void create(String id, String nameKey, String infoKey,
-			String attribute, String categoryKey, String groupKey,
-			String attribute1, String attribute2, String attribute3) {
-		try {
-			Messages.getRequired(nameKey);
-		} catch (MissingResourceException e) {
-			LOG.debug("Skipping obsolete talent " + id);
-		}
+        public TalentDaoHelper() {
+            super(Talent.class, "select * from _template_talent order by id");
 
-		final Talent adv = new Talent(id, nameKey, infoKey, attribute,
-				categoryKey, groupKey, toAttributes(attribute1, attribute2,
-						attribute3));
+            int i = 0;
+            attributes = new String[values().length];
 
-		if (values == null) {
-			values = new Talent[] { adv, };
-		} else {
-			values = (Talent[]) ArrayUtils.add(values, adv);
-		}
+            for (Talent talent : values()) {
+                attributes[i++] = talent.getAttribute();
+            }
+        }
 
-		if (attributes == null) {
-			attributes = new String[] { adv.getAttribute(), };
-		} else {
-			attributes = (String[]) ArrayUtils.add(attributes, adv
-					.getAttribute());
-		}
+        @Override
+        protected Talent create(ResultSet result) throws SQLException {
+            return create(result.getString("Id"), result.getString("Name"),
+                result.getString("Description"), result.getString("TaAttr"),
+                result.getString("TaCategory"), result.getString("TaGroup"),
+                result.getString("TaP1"), result.getString("TaP2"), result.getString("TaP3"));
+        }
 
-		LOG.debug("Loaded talent: {}", adv);
-	}
+        private Talent create(String id, String nameKey, String infoKey, String attribute,
+            String categoryKey, String groupKey, String attribute1, String attribute2,
+            String attribute3) {
+            try {
+                Messages.getRequired(nameKey);
+            } catch (MissingResourceException e) {
+                LOG.debug("Skipping obsolete talent " + id);
+            }
 
-	private static String[] toAttributes(String attribute1, String attribute2,
-			String attribute3) {
-		if (StringUtils.isBlank(attribute1) || StringUtils.isBlank(attribute2)
-				|| StringUtils.isBlank(attribute3)) {
-			return null;
-		}
+            final Talent talent =
+                new Talent(id, nameKey, infoKey, attribute, categoryKey, groupKey,
+                    toAttributes(attribute1, attribute2, attribute3));
 
-		return new String[] { attribute1, attribute2, attribute3 };
-	}
+            return talent;
+        }
 
-	public static Talent valueOf(String attribute) {
-		for (Talent adv : values) {
-			if (adv.getAttribute().equals(attribute)) {
-				return adv;
-			}
-		}
+        private String[] toAttributes(String attribute1, String attribute2, String attribute3) {
+            if (StringUtils.isBlank(attribute1) ||
+                    StringUtils.isBlank(attribute2) ||
+                    StringUtils.isBlank(attribute3)) {
+                return null;
+            }
 
-		throw new IllegalArgumentException("Unknown talent: " + attribute);
-	}
+            return new String[] { attribute1, attribute2, attribute3 };
+        }
 
-	public static Talent[] values() {
-		return values;
-	}
+        public String[] getAttributes() {
+            return attributes;
+        }
 
-	public static String[] attributes() {
-		return attributes;
-	}
+        protected boolean isItem(Talent item, String id) {
+            return item.getAttribute().equals(id);
+        }
+    }
 }

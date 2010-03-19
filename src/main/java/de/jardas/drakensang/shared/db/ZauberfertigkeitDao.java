@@ -1,105 +1,89 @@
 package de.jardas.drakensang.shared.db;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.MissingResourceException;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-
-import de.jardas.drakensang.shared.DrakensangException;
 import de.jardas.drakensang.shared.model.Zauberfertigkeit;
 
+import org.apache.commons.lang.StringUtils;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import java.util.MissingResourceException;
+
+
 public final class ZauberfertigkeitDao {
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory
-			.getLogger(ZauberfertigkeitDao.class);
-	private static Zauberfertigkeit[] values;
-	private static String[] attributes;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TalentDao.class);
+    private static final ZauberfertigkeitDaoHelper DAO = new ZauberfertigkeitDaoHelper();
 
-	static {
-		LOG.info("Loading spells");
+    private ZauberfertigkeitDao() {
+        // utility class
+    }
 
-		try {
-			final PreparedStatement statement = Static.getConnection()
-					.prepareStatement(
-							"select * from _template_zauber order by id");
-			final ResultSet result = statement.executeQuery();
+    public static Zauberfertigkeit valueOf(String attribute) {
+        return DAO.valueOf(attribute);
+    }
 
-			while (result.next()) {
-				create(result.getString("Id"), result.getString("Name"), result
-						.getString("Description"), result.getString("ZaAttr"),
-						result.getString("CategoryName"), result
-								.getString("ZaP1"), result.getString("ZaP2"),
-						result.getString("ZaP3"));
-			}
-		} catch (SQLException e) {
-			throw new DrakensangException("Error loading spells: " + e, e);
-		}
+    public static Zauberfertigkeit[] values() {
+        return DAO.values();
+    }
 
-		LOG.info("Loaded " + values.length + " spells.");
-	}
+    public static String[] attributes() {
+        return DAO.getAttributes();
+    }
 
-	private ZauberfertigkeitDao() {
-		// utility class
-	}
+    private static class ZauberfertigkeitDaoHelper extends EnumerationDao<Zauberfertigkeit> {
+        private final String[] attributes;
 
-	private static void create(String id, String nameKey, String infoKey,
-			String attribute, String categoryKey, String attribute1,
-			String attribute2, String attribute3) {
-		try {
-			Messages.getRequired(nameKey);
-		} catch (MissingResourceException e) {
-			LOG.debug("Skipping obsolete spell " + id);
-			
-			return;
-		}
+        public ZauberfertigkeitDaoHelper() {
+            super(Zauberfertigkeit.class, "select * from _template_zauber order by id");
 
-		final Zauberfertigkeit adv = new Zauberfertigkeit(id, nameKey, infoKey,
-				categoryKey, attribute, toAttributes(attribute1, attribute2,
-						attribute3));
+            int i = 0;
+            attributes = new String[values().length];
 
-		if (values == null) {
-			values = new Zauberfertigkeit[] { adv, };
-		} else {
-			values = (Zauberfertigkeit[]) ArrayUtils.add(values, adv);
-		}
+            for (Zauberfertigkeit talent : values()) {
+                attributes[i++] = talent.getAttribute();
+            }
+        }
 
-		if (attributes == null) {
-			attributes = new String[] { adv.getAttribute(), };
-		} else {
-			attributes = (String[]) ArrayUtils.add(attributes, adv
-					.getAttribute());
-		}
+        @Override
+        protected Zauberfertigkeit create(ResultSet result)
+            throws SQLException {
+            return create(result.getString("Id"), result.getString("Name"),
+                result.getString("Description"), result.getString("ZaAttr"),
+                result.getString("CategoryName"), result.getString("ZaP1"),
+                result.getString("ZaP2"), result.getString("ZaP3"));
+        }
 
-		LOG.debug("Loaded spell: {}", adv);
-	}
+        private Zauberfertigkeit create(String id, String nameKey, String infoKey,
+            String attribute, String categoryKey, String attribute1, String attribute2,
+            String attribute3) {
+            try {
+                Messages.getRequired(nameKey);
+            } catch (MissingResourceException e) {
+                LOG.debug("Skipping obsolete spell " + id);
 
-	private static String[] toAttributes(String attribute1, String attribute2,
-			String attribute3) {
-		if (StringUtils.isBlank(attribute1) || StringUtils.isBlank(attribute2)
-				|| StringUtils.isBlank(attribute3)) {
-			return null;
-		}
+                return null;
+            }
 
-		return new String[] { attribute1, attribute2, attribute3 };
-	}
+            return new Zauberfertigkeit(id, nameKey, infoKey, categoryKey, attribute,
+                toAttributes(attribute1, attribute2, attribute3));
+        }
 
-	public static Zauberfertigkeit valueOf(String attribute) {
-		for (Zauberfertigkeit adv : values) {
-			if (adv.getAttribute().equals(attribute)) {
-				return adv;
-			}
-		}
+        private String[] toAttributes(String attribute1, String attribute2, String attribute3) {
+            if (StringUtils.isBlank(attribute1) ||
+                    StringUtils.isBlank(attribute2) ||
+                    StringUtils.isBlank(attribute3)) {
+                return null;
+            }
 
-		throw new IllegalArgumentException("Unknown spell: " + attribute);
-	}
+            return new String[] { attribute1, attribute2, attribute3 };
+        }
 
-	public static Zauberfertigkeit[] values() {
-		return values;
-	}
+        public String[] getAttributes() {
+            return attributes;
+        }
 
-	public static String[] attributes() {
-		return attributes;
-	}
+        protected boolean isItem(Zauberfertigkeit item, String id) {
+            return item.getAttribute().equals(id);
+        }
+    }
 }

@@ -1,61 +1,43 @@
 package de.jardas.drakensang.shared.model;
 
-import de.jardas.drakensang.shared.db.Static;
+public final class Culture implements Identified {
+    private final String id;
+    private final int lebensenergieModifikator;
+    private final int ausdauerModifikator;
+    private final int astralenergieModifikator;
+    private final int magieresistenzModifikator;
 
-public enum Culture implements Identified {
-	Amazone,
-	Ambosszwerg,
-	Andergaster,
-	Auelf,
-	Garetier,
-	Horasier,
-	Mhanadistani,
-	Mittelreicher,
-	Gjalskerlaender,
-	Novadi,
-	Thorwaler,
-	Waldelf,
-	;
+    public Culture(String id, int lebensenergieModifikator, int ausdauerModifikator,
+        int astralenergieModifikator, int magieresistenzModifikator) {
+        this.id = id;
+        this.lebensenergieModifikator = lebensenergieModifikator;
+        this.ausdauerModifikator = ausdauerModifikator;
+        this.astralenergieModifikator = astralenergieModifikator;
+        this.magieresistenzModifikator = magieresistenzModifikator;
+    }
 
-	private final int lebensenergieModifikator;
-	private final int ausdauerModifikator;
-	private final int astralenergieModifikator;
-	private final int magieresistenzModifikator;
-	private final int karmaModifikator;
+    public String getId() {
+        return id;
+    }
 
-	private Culture() {
-		lebensenergieModifikator = Integer.parseInt(Static.get("LEMax", name(),
-				"id", "_template_culture"));
-		ausdauerModifikator = Integer.parseInt(Static.get("AUMax", name(),
-				"id", "_template_culture"));
-		astralenergieModifikator = Integer.parseInt(Static.get("AEMax", name(),
-				"id", "_template_culture"));
-		magieresistenzModifikator = Integer.parseInt(Static.get("MR", name(),
-				"id", "_template_culture"));
-		karmaModifikator = 0;
-	}
+    public int getLebensenergieModifikator() {
+        return lebensenergieModifikator;
+    }
 
-	public int getKarmaModifikator() {
-		return karmaModifikator;
-	}
+    public int getAusdauerModifikator() {
+        return ausdauerModifikator;
+    }
 
-	public int getLebensenergieModifikator() {
-		return lebensenergieModifikator;
-	}
+    public int getAstralenergieModifikator() {
+        return astralenergieModifikator;
+    }
 
-	public int getAusdauerModifikator() {
-		return ausdauerModifikator;
-	}
+    public int getMagieresistenzModifikator() {
+        return magieresistenzModifikator;
+    }
 
-	public int getAstralenergieModifikator() {
-		return astralenergieModifikator;
-	}
-
-	public int getMagieresistenzModifikator() {
-		return magieresistenzModifikator;
-	}
-	
-	public String getId() {
-		return name();
-	}
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + getId() + "]";
+    }
 }

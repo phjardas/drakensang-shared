@@ -1,48 +1,57 @@
 package de.jardas.drakensang.shared.model;
 
-import de.jardas.drakensang.shared.db.Static;
+public final class Race implements Identified {
+    private final String id;
+    private final int lebensenergieModifikator;
+    private final int ausdauerModifikator;
+    private final int astralenergieModifikator;
+    private final int magieresistenzModifikator;
+    private final int karmaModifikator = 0;
 
-public enum Race implements Identified {
-	Elf, Halbelf, Mittellaender, Thorwaler, Tulamide, Zwerg;
+    public Race(String id, int lebensenergieModifikator, int ausdauerModifikator,
+        int astralenergieModifikator, int magieresistenzModifikator) {
+        super();
+        this.id = id;
+        this.lebensenergieModifikator = lebensenergieModifikator;
+        this.ausdauerModifikator = ausdauerModifikator;
+        this.astralenergieModifikator = astralenergieModifikator;
+        this.magieresistenzModifikator = magieresistenzModifikator;
+    }
 
-	private final int lebensenergieModifikator;
-	private final int ausdauerModifikator;
-	private final int astralenergieModifikator;
-	private final int magieresistenzModifikator;
-	private final int karmaModifikator = 0;
+    public String getId() {
+        return id;
+    }
 
-	private Race() {
-		lebensenergieModifikator = Integer.parseInt(Static.get("LEMax", name(),
-				"id", "_template_race"));
-		ausdauerModifikator = Integer.parseInt(Static.get("AUMax", name(),
-				"id", "_template_race"));
-		astralenergieModifikator = Integer.parseInt(Static.get("AEMax", name(),
-				"id", "_template_race"));
-		magieresistenzModifikator = Integer.parseInt(Static.get("MR", name(),
-				"id", "_template_race"));
-	}
-	
-	public String getId() {
-		return name();
-	}
+    public int getKarmaModifikator() {
+        return karmaModifikator;
+    }
 
-	public int getKarmaModifikator() {
-		return karmaModifikator;
-	}
+    public int getLebensenergieModifikator() {
+        return lebensenergieModifikator;
+    }
 
-	public int getLebensenergieModifikator() {
-		return lebensenergieModifikator;
-	}
+    public int getAusdauerModifikator() {
+        return ausdauerModifikator;
+    }
 
-	public int getAusdauerModifikator() {
-		return ausdauerModifikator;
-	}
+    public int getAstralenergieModifikator() {
+        return astralenergieModifikator;
+    }
 
-	public int getAstralenergieModifikator() {
-		return astralenergieModifikator;
-	}
+    public int getMagieresistenzModifikator() {
+        return magieresistenzModifikator;
+    }
 
-	public int getMagieresistenzModifikator() {
-		return magieresistenzModifikator;
-	}
+    public boolean isElf() {
+        return "Elf".equals(getId());
+    }
+
+    public boolean isDwarf() {
+        return "Zwerg".equals(getId());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + getId() + "]";
+    }
 }

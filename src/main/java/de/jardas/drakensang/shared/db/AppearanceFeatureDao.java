@@ -113,8 +113,7 @@ public abstract class AppearanceFeatureDao<F extends AppearanceFeature> {
         final List<F> ret = new LinkedList<F>();
 
         for (F item : values) {
-            if (ArrayUtils.contains(item.getSexes(), sex) &&
-                    (item.isDwarvish() == (race == Race.Zwerg))) {
+            if (ArrayUtils.contains(item.getSexes(), sex) && (item.isDwarvish() == race.isDwarf())) {
                 ret.add(item);
             }
         }
