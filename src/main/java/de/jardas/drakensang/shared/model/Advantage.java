@@ -1,5 +1,7 @@
 package de.jardas.drakensang.shared.model;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,10 @@ public class Advantage implements Identified {
     }
 
     private static Effect[] loadEffects(String modifiers) {
+        if (StringUtils.isBlank(modifiers)) {
+            return new Effect[0];
+        }
+
         final String[] tokens = modifiers.trim().split("\\s*;\\s*");
         List<Effect> effects = new ArrayList<Effect>(tokens.length);
 
@@ -28,11 +34,12 @@ public class Advantage implements Identified {
 
             final String[] nameAndMod = token.split(":");
 
-            String targetName = nameAndMod[0];
-            EffectTarget targetType = EffectTarget.getTargetType(targetName);
-            int modifier =
-                Integer.valueOf(nameAndMod[1].startsWith("+") ? nameAndMod[1].substring(1)
-                                                              : nameAndMod[1]);
+            final String targetName = nameAndMod[0].trim();
+            final EffectTarget targetType = EffectTarget.getTargetType(targetName);
+            final String modifierValue = nameAndMod[1].trim();
+            final int modifier =
+                Integer.valueOf(modifierValue.startsWith("+") ? modifierValue.substring(1)
+                                                              : modifierValue);
             effects.add(new Effect(targetType, targetName, modifier));
         }
 
