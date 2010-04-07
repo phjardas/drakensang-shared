@@ -42,7 +42,7 @@ public class RegeneratingPanel extends JPanel {
 		addInput("reg.value", value, row++);
 
 		final JSpinner bonus = new JSpinner(new SpinnerNumberModel(regenerating
-				.getBonus(), -100, 100, 1));
+				.getBonus(), -1000, 1000, 1));
 		bonus.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				regenerating.setBonus(((Number) bonus.getValue()).intValue());
@@ -56,7 +56,7 @@ public class RegeneratingPanel extends JPanel {
 		addInput("reg.max", max, row++);
 
 		final JSpinner regeneration = new JSpinner(new SpinnerNumberModel(
-				regenerating.getRegenerationAmount(), 0, 100, 1));
+				regenerating.getRegenerationAmount(), 0, 1000, 1));
 		regeneration.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				regenerating.setRegenerationAmount(((Number) regeneration
