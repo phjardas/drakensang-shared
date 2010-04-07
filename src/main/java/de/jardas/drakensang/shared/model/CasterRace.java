@@ -4,6 +4,7 @@ public enum CasterRace implements Identified {
 	human,
 	dwarf,
 	elvish,
+	dabbler,
 	;
 	
 	public String getId() {
