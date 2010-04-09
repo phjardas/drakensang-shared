@@ -280,7 +280,7 @@ public abstract class Person extends Persistable implements PropertyChangeProduc
 
     public void initialized() {
         if (!this.initialized) {
-            LOG.debug("Initializing {}", this);
+            LOG.debug("Initializing {}", getId());
             this.initialized = true;
             firePropertyChange(null, null, null);
         }

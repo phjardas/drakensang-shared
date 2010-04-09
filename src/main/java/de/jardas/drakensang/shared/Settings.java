@@ -2,6 +2,9 @@ package de.jardas.drakensang.shared;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +20,7 @@ public abstract class Settings {
     private static File settingsFile;
     private static Settings instance;
     private static Class<?extends Settings> settingsClass;
+    private final PropertyChangeSupport listeners = new PropertyChangeSupport(this);
     private File drakensangHome;
     private int latestKnownFeature;
     private Locale locale;
@@ -85,7 +89,8 @@ public abstract class Settings {
     }
 
     public void setDrakensangHome(File drakensangHome) {
-        this.drakensangHome = drakensangHome;
+        listeners.firePropertyChange("drakensangHome", this.drakensangHome,
+            this.drakensangHome = drakensangHome);
     }
 
     public int getLatestKnownFeature() {
@@ -93,7 +98,8 @@ public abstract class Settings {
     }
 
     public void setLatestKnownFeature(int latestKnownFeature) {
-        this.latestKnownFeature = latestKnownFeature;
+        listeners.firePropertyChange("latestKnownFeature", this.latestKnownFeature,
+            this.latestKnownFeature = latestKnownFeature);
     }
 
     public Locale getLocale() {
@@ -101,7 +107,15 @@ public abstract class Settings {
     }
 
     public void setLocale(Locale locale) {
-        this.locale = locale;
+        listeners.firePropertyChange("locale", this.locale, this.locale = locale);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        listeners.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        listeners.removePropertyChangeListener(listener);
     }
 
     public synchronized void save() {
