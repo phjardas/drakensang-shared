@@ -16,23 +16,26 @@ import javax.swing.MutableComboBoxModel;
 public abstract class IdentifiedComboBox<I extends Identified> extends JComboBox {
     private I current = null;
 
-    public IdentifiedComboBox(I[] values, final I selected) {
+    public IdentifiedComboBox(final I[] values, final I selected) {
         super();
         setModel(new DefaultComboBoxModel());
 
         replaceValues(values, selected);
 
         addItemListener(new ItemListener() {
-                public void itemStateChanged(ItemEvent evt) {
+                public void itemStateChanged(final ItemEvent evt) {
                     if (evt.getStateChange() == ItemEvent.SELECTED) {
-                        LocalizedItem selected = (LocalizedItem) evt.getItem();
+                        @SuppressWarnings("unchecked")
+                        final LocalizedItem selected = (LocalizedItem) evt.getItem();
 
                         try {
                             valueChanged(selected.getItem());
                             current = selected.getItem();
                         } catch (ChangeRejectedException e) {
-                            JOptionPane.showMessageDialog(Launcher.getMainFrame(), e.getMessage(),
-                                e.getTitle(), JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(Launcher.getMainFrame(),
+                                e.getMessage(),
+                                e.getTitle(),
+                                JOptionPane.ERROR_MESSAGE);
                             setSelected(current);
                         }
                     }
@@ -40,10 +43,10 @@ public abstract class IdentifiedComboBox<I extends Identified> extends JComboBox
             });
     }
 
-    public void replaceValues(I[] enumeration, I selected) {
+    public void replaceValues(final I[] enumeration, final I selected) {
         removeAllItems();
 
-        for (I item : enumeration) {
+        for (final I item : enumeration) {
             if (accept(item)) {
                 getMutableModel().addElement(new LocalizedItem(item, getLabel(item.getId())));
             }
@@ -56,11 +59,11 @@ public abstract class IdentifiedComboBox<I extends Identified> extends JComboBox
         return ((MutableComboBoxModel) getModel());
     }
 
-    public void setSelected(I selected) {
+    public void setSelected(final I selected) {
         if (selected != null) {
             for (int i = 0; i < getMutableModel().getSize(); i++) {
-                LocalizedItem el = (LocalizedItem) getMutableModel()
-                                                       .getElementAt(i);
+                @SuppressWarnings("unchecked")
+                final LocalizedItem el = (LocalizedItem) getMutableModel().getElementAt(i);
 
                 if (el.getItem() == selected) {
                     setSelectedIndex(i);
@@ -70,13 +73,13 @@ public abstract class IdentifiedComboBox<I extends Identified> extends JComboBox
         }
     }
 
-    protected String getLabel(String id) {
+    protected String getLabel(final String id) {
         return Messages.get(id);
     }
 
     protected abstract void valueChanged(I item) throws ChangeRejectedException;
 
-    protected boolean accept(I item) {
+    protected boolean accept(final I item) {
         return (item != null) && (item.getId() != null);
     }
 
@@ -84,7 +87,7 @@ public abstract class IdentifiedComboBox<I extends Identified> extends JComboBox
         private final I item;
         private final String label;
 
-        public LocalizedItem(I item, String label) {
+        public LocalizedItem(final I item, final String label) {
             super();
             this.item = item;
             this.label = label;
